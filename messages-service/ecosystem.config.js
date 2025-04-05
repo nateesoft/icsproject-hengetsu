@@ -1,13 +1,5 @@
 module.exports = {
     apps: [{
-      name: "msg-service0",
-      script: "messages-service/bin/www",
-      env: {
-        PORT:8080,
-        NODE_ENV:"production"
-      }
-    },
-    {
       name: "msg-service1",
       script: "messages-service/bin/www",
       env: {

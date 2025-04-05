@@ -1,10 +1,10 @@
 module.exports = {
     apps: [{
-      name: "pos-app0",
+      name: "pos-app",
       script: "pos-restaurant/server/server.js",
       env: {
         WEB_PORT:3000,
-        SERVICE_HOST:"http://127.0.0.1:9090/api",
+        SERVICE_HOST:"http://127.0.0.1:9091/api",
         WEB_FOLDER:"webapp"
       }
     },
@@ -14,7 +14,7 @@ module.exports = {
       env: {
         WEB_PORT:3001,
         SERVICE_HOST:"http://127.0.0.1:9091/api",
-        WEB_FOLDER:"webapp"
+        WEB_FOLDER:"webapp1"
       }
     },
     {
@@ -23,7 +23,7 @@ module.exports = {
       env: {
         WEB_PORT:3002,
         SERVICE_HOST:"http://127.0.0.1:9092/api",
-        WEB_FOLDER:"webapp"
+        WEB_FOLDER:"webapp2"
       }
     },
     {
@@ -32,7 +32,7 @@ module.exports = {
       env: {
         WEB_PORT:3003,
         SERVICE_HOST:"http://127.0.0.1:9093/api",
-        WEB_FOLDER:"webapp"
+        WEB_FOLDER:"webapp3"
       }
     }]
   }

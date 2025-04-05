@@ -1,0 +1,25 @@
+{
+  "name": "messages-service",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www",
+    "local": "node ./bin/www",
+    "start:prtservice1": "node --env-file=.env.prtservice1 ./bin/www",
+    "start:prtservice2": "node --env-file=.env.prtservice2 ./bin/www",
+    "start:prtservice3": "node --env-file=.env.prtservice3 ./bin/www"
+  },
+  "dependencies": {
+    "compression": "^1.7.5",
+    "cookie-parser": "~1.4.4",
+    "cors": "^2.8.5",
+    "debug": "~2.6.9",
+    "dotenv": "^16.4.7",
+    "express": "~4.16.1",
+    "helmet": "^8.0.0",
+    "http-errors": "~1.6.3",
+    "morgan": "~1.9.1",
+    "pug": "2.0.0-beta11",
+    "socket.io": "^4.8.1"
+  }
+}

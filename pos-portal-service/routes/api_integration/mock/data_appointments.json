@@ -1,0 +1,44 @@
+{
+  "id": 1131,
+  "all_day": false,
+  "cost": "11600",
+  "customer_id": 0,
+  "date_created": 1738243725,
+  "date_modified": 1738243789,
+  "start": 1738344600,
+  "end": 1738351800,
+  "google_calendar_event_id": "0",
+  "google_calendar_staff_event_ids": "",
+  "order_id": 1132,
+  "order_item_id": 12,
+  "parent_id": 0,
+  "product_id": 403,
+  "staff_id": [],
+  "staff_ids": [],
+  "status": "unpaid",
+  "customer_status": "no-show",
+  "qty": 2,
+  "timezone": "Asia/Jakarta",
+  "local_timezone": "",
+  "_links": {
+    "self": [
+      {
+        "href": "https://demo17.demodigihypedesign.com/wp-json/wc-appointments/v1/appointments/1131",
+        "targetHints": {
+          "allow": [
+            "GET",
+            "POST",
+            "PUT",
+            "PATCH",
+            "DELETE"
+          ]
+        }
+      }
+    ],
+    "collection": [
+      {
+        "href": "https://demo17.demodigihypedesign.com/wp-json/wc-appointments/v1/appointments"
+      }
+    ]
+  }
+}

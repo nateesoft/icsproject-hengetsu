@@ -1,0 +1,3 @@
+const SQL_QUERY = `
+INSERT INTO TABLE_NAME () VALUES ()
+`;

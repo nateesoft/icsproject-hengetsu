@@ -2,3 +2,6 @@ messages-service/node_modules
 pos-portal-service/node_modules
 pos-restaurant/server/node_modules
 *lib*
+messages-service/start.bat
+pos-portal-service/start.bat
+pos-restaurant/server/start.bat

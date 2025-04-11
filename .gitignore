@@ -1,7 +1,14 @@
 messages-service/node_modules
+messages-service/ecosystem.config.js
+
 pos-portal-service/node_modules
+pos-portal-service/ecosystem.config.js
+
 pos-restaurant/server/node_modules
+pos-restaurant/server/ecosystem.config.js
+
 *lib*
-messages-service/start.bat
-pos-portal-service/start.bat
-pos-restaurant/server/start.bat
+
+config.json
+cashier.properties
+socket_config.properties

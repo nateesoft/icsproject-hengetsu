@@ -1,4 +1,4 @@
 {
-    "SOCKET_HOST": "http://127.0.0.1:8083",
+    "SOCKET_HOST": "http://127.0.0.1:8081",
     "MACNO": "001"
 }

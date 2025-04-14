@@ -898,9 +898,59 @@ const printRefundBillHtml = async ({ macno, billInfo, tSaleInfo }) => {
   return htmlContent
 }
 
+const printPaidInOutHtml = async ({ branchName, cashier, paidInOutAmt, typeDesc, timeProcess, reason, macno }) => {
+  const htmlContent = `
+    ${Divider}
+    <div align="center">รายการนำเงินเข้าออกลิ้นชัก</div>
+    ${Divider}
+    <table width="100%">
+      <thead>
+          <tr>
+              <td>สาขาที่ทำรายการ</td>
+              <td>${branchName}</td>
+          </tr>
+          <tr>
+              <td>หมายเลขเครื่อง</td>
+              <td>${macno}</td>
+          </tr>
+          <tr>
+              <td>พนักงานที่ทำรายการ</td>
+              <td>${cashier}</td>
+          </tr>
+          <tr>
+              <td colspan="2" align="center">${Divider}</td>
+          </tr>
+      </thead>
+      <tbody>
+          <tr>
+              <td>ประเภท</td>
+              <td>${typeDesc}</td>
+          </tr>
+          <tr>
+              <td>จำนวนเงิน</td>
+              <td>${formatNumber(paidInOutAmt)}</td>
+          </tr>
+          <tr>
+              <td>เหตุผลที่นำเงินเข้า</td>
+              <td>${reason}</td>
+          </tr>
+          <tr>
+              <td>วันเวลาที่ทำรายการ</td>
+              <td>${timeProcess}</td>
+          </tr>
+          <tr>
+              <td colspan="2" align="center">${Divider}</td>
+          </tr>
+      </tbody>
+    </table>
+  `
+  return htmlContent
+}
+
 module.exports = {
   printReceiptHtml,
   printReviewReceiptHtml,
   printRefundBillHtml,
-  printReceiptCopyHtml
+  printReceiptCopyHtml,
+  printPaidInOutHtml
 }

@@ -65,7 +65,7 @@ module.exports = {
         BOOKING_API_HOST: "https://demo17.demodigihypedesign.com/wp-json",
         BOOKING_API_KEY: "ck_9774d4bd980494bd81409edf64581b010b688232",
         BOOKING_API_SECRET: "cs_b518af0e51df821a40ecc7a51e573af621b0d2d3",
-        SOCKETIO_SERVER: "http://127.0.0.1:8081",
+        SOCKETIO_SERVER: "http://127.0.0.1:8082",
         CUSTOMER_ORDER_HOST: "http://192.168.1.197:3335",
         RECEIPT_FONT_FAMILY: "Angsana New"
       }
@@ -100,7 +100,7 @@ module.exports = {
         BOOKING_API_HOST: "https://demo17.demodigihypedesign.com/wp-json",
         BOOKING_API_KEY: "ck_9774d4bd980494bd81409edf64581b010b688232",
         BOOKING_API_SECRET: "cs_b518af0e51df821a40ecc7a51e573af621b0d2d3",
-        SOCKETIO_SERVER: "http://127.0.0.1:8081",
+        SOCKETIO_SERVER: "http://127.0.0.1:8083",
         CUSTOMER_ORDER_HOST: "http://192.168.1.197:3336",
         RECEIPT_FONT_FAMILY: "Angsana New"
       }

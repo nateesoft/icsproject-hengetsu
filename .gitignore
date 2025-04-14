@@ -10,5 +10,5 @@ pos-restaurant/server/ecosystem.config.js
 *lib*
 
 config.json
-*cashier.properties
-*socket_config.properties
+cashier.properties
+socket_config.properties

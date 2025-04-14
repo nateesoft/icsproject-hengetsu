@@ -1,5 +1,7 @@
 const pool = require("../config/database/MySqlConnect")
 const { getMoment } = require("../utils/MomentUtil")
+const { getBranch } = require("./BranchService")
+const { getReportCashier, getReportTerminal } = require("./member/crm/MTranService")
 
 const getTableOnAction = async (date) => {
   let sql = `select R_Date, R_Table,sum(R_Total) R_Total,R_Void,TCurTime,TCustomer 
@@ -99,15 +101,21 @@ const getTerminalByMacno = async (macno) => {
     const sumTypeT = T.length > 0 ? T[0] : initData
     const sumTypeD = D.length > 0 ? D[0] : initData
 
+    // get member info from crm service
+    const branchInfo = await getBranch()
+    const memberInfo = await getReportTerminal(macno, branchInfo.Code)
+
     return {
       cashier: results[0],
       paidio: getPaidIO,
       sumTypeE,
       sumTypeT,
-      sumTypeD
+      sumTypeD,
+      memberInfo
     }
+  } else {
+    return {}
   }
-  return {}
 }
 
 const getTerminalByCashier = async (cashier) => {
@@ -182,6 +190,10 @@ const getTerminalByCashier = async (cashier) => {
     const result1 = await pool.query(sql1)
     const result2 = await pool.query(sql2)
 
+    // get member info from crm service
+    const branchInfo = await getBranch()
+    const memberInfo = await getReportCashier(cashier, branchInfo.Code)
+
     return {
       cashier: results[0],
       paidio: getPaidIO,
@@ -189,10 +201,12 @@ const getTerminalByCashier = async (cashier) => {
       sumTypeT,
       sumTypeD,
       receiptBill: result1[0],
-      voidBill: result2[0]
+      voidBill: result2[0],
+      memberInfo
     }
+  } else {
+    return {}
   }
-  return {}
 }
 
 const getGroupName = (groupName) => {
@@ -511,46 +525,35 @@ const getVoidBill = async (macno1, macno2, cashier1, cashier2) => {
 }
 
 const getCreditPayment = async (macno1, macno2, cashier1, cashier2) => {
-  let sql = `select c.CrCode, c.CrName, 
-            b.B_CardNo1, b.B_AppCode1, b.B_CrChargeAmt1, b.B_CrAmt1 
-            from billno b left join creditfile c on b.B_CrCode1 =c.CrCode 
-            where b.B_OnDate ='${getMoment().format("YYYY-MM-DD")}' 
-            and b.B_Void <> 'V' 
-            and (B_CrCode1 <> '' or B_CrCode1 <> null) `
-  let sql2 = `select c.CrCode, count(c.CrCode), 
-        sum(b.B_CrChargeAmt1) B_CrChargeAmt1, sum(b.B_CrAmt1) B_CrAmt1 
-        from billno b  left join creditfile c on b.B_CrCode1 =c.CrCode 
-        where b.B_OnDate ='${getMoment().format(
-          "YYYY-MM-DD"
-        )}' and b.B_Void <> 'V' 
-        and (B_CrCode1 <> '' or B_CrCode1 <> null) `
+
+  let sqlQuery = `select tc.* 
+    from t_credit tc 
+    left join billno b on tc.refno=b.B_Refno 
+    where b.B_Void <> 'V' 
+    and tc.ondate = '${getMoment().format("YYYY-MM-DD")}' `
 
   if (macno1 && macno2) {
-    sql = sql + ` and b.B_MacNo between '${macno1}' and '${macno2}' `
-    sql2 = sql2 + ` and b.B_MacNo between '${macno1}' and '${macno2}' `
+    sqlQuery = sqlQuery + ` and (tc.macno between '${macno1}' and '${macno2}') `
   }
   if (cashier1 && cashier2) {
-    sql = sql + ` and b.B_Cashier between '${cashier1}' and '${cashier2}' `
-    sql2 = sql2 + ` and b.B_Cashier between '${cashier1}' and '${cashier2}' `
+    sqlQuery = sqlQuery + ` and (tc.cashier between '${cashier1}' and '${cashier2}') `
   }
 
-  sql2 = sql2 + " group by CrCode "
+  const resultCredit = await pool.query(sqlQuery)
 
-  const results = await pool.query(sql)
-  const results2 = await pool.query(sql2)
-
-  const newResults = results.map((item, index) => {
+  const newResults = resultCredit.map((item, index) => {
     return {
       ...item,
       index: index + 1
     }
   })
+
   return {
     data: newResults,
     summary: {
       creditCount: newResults.length,
       creditAmount: newResults.reduce(
-        (partialSum, a) => partialSum + a.B_CrAmt1,
+        (partialSum, a) => partialSum + a.CrAmt,
         0
       )
     }

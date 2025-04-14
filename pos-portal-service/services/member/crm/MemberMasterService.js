@@ -96,9 +96,9 @@ const checkTimeExpired = (startDateTimeStr, endDateTimeStr) => {
     return getMoment(currentDateTime).isBetween(getMoment(startDateTime), getMoment(endDateTime))
 }
 
-const computeMemberScore = async (B_NetTotal, Member_PointExpiredDate) => {
+const computeMemberScore = async (B_NetTotal, Member_ExpiredDate) => {
     // check member expired
-    const isMemberExpired = checkDateExpired(getYesterday().format('YYYY-MM-DD HH:mm:ss'), Member_PointExpiredDate)
+    const isMemberExpired = checkDateExpired(getYesterday().format('YYYY-MM-DD HH:mm:ss'), Member_ExpiredDate)
     if (!isMemberExpired) {
         return 0
     }
@@ -128,7 +128,7 @@ const computeMemberScore = async (B_NetTotal, Member_PointExpiredDate) => {
 
 const updateMemberData = async (B_NetTotal, B_MemCode,
     B_MacNo, B_Refno, allBalance, branchCode, B_ETD,
-    B_Total, B_ServiceAmt, B_MemDiscAmt, empCode, B_OnDate, B_Ontime, memberInfo) => {
+    B_Total, B_ServiceAmt, B_MemDiscAmt, B_Cashier, B_OnDate, B_Ontime, memberInfo) => {
 
     // create new mtran
     const Receipt_No = B_MacNo + "/" + B_Refno;
@@ -139,10 +139,10 @@ const updateMemberData = async (B_NetTotal, B_MemCode,
     const DiscountAmount = B_MemDiscAmt;
     const NetAmount = B_NetTotal;
     const Mechine_Code = B_MacNo;
-    const Employee_Code = empCode;
+    const Employee_Code = B_Cashier;
     const Service_Date = B_OnDate;
     const Service_Time = B_Ontime;
-    const Score = await computeMemberScore(B_NetTotal, memberInfo.Member_PointExpiredDate);
+    const Score = await computeMemberScore(B_NetTotal, memberInfo.Member_ExpiredDate);
     const TranferFlag = "N";
 
     await createMtran({
@@ -158,7 +158,21 @@ const updateMemberData = async (B_NetTotal, B_MemCode,
     const results = await pool.query(sql)
 
     // create new mplu
-    allBalance.forEach(async balance => {
+    const asyncFunc = async (Service_Date,
+      Member_Code, Branch_Code, Receipt_No, PLU_Group,
+      Sale_Type, PLU_GroupName, PLU_Code, PLU_Name,
+      PLU_Amount, PLU_Quantity, PLU_Price, TranferFlag) => {
+        await createMPlu({
+            Service_Date,
+            Member_Code, Branch_Code, Receipt_No, PLU_Group,
+            Sale_Type, PLU_GroupName, PLU_Code, PLU_Name,
+            PLU_Amount, PLU_Quantity, PLU_Price, TranferFlag
+        })
+    }
+
+    const run = async () => {
+      for (const key in allBalance) {
+        const balance = allBalance[key]
         const PLU_Group = balance.R_Group;
         const Sale_Type = balance.R_ETD;
         const PLU_GroupName = "";
@@ -168,13 +182,14 @@ const updateMemberData = async (B_NetTotal, B_MemCode,
         const PLU_Quantity = balance.R_Quan;
         const PLU_Price = balance.R_Price;
         const TranferFlag = "N";
-        await createMPlu({
-            Service_Date,
+
+        await asyncFunc(Service_Date,
             Member_Code, Branch_Code, Receipt_No, PLU_Group,
             Sale_Type, PLU_GroupName, PLU_Code, PLU_Name,
-            PLU_Amount, PLU_Quantity, PLU_Price, TranferFlag
-        })
-    });
+            PLU_Amount, PLU_Quantity, PLU_Price, TranferFlag);
+      }
+    };
+    run();
 
     return results
 }

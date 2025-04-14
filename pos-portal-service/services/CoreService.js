@@ -184,6 +184,7 @@ const computeBalanceSummary = (
   DrinkVat,
   ProductVat,
   totalDiscountAmount,
+  totalItemDiscAmount,
   totalServiceAmount,
   totalVatAmount,
   totalProductNoneVatAmount,
@@ -195,137 +196,145 @@ const computeBalanceSummary = (
 ) => {
   balanceList.forEach((balance) => {
 
-    // compute RNetTotal
-    let RNetTotal = balance.R_Price * balance.R_Quan
+    if(balance.R_Total > 0){
 
-    if (balance.R_Service === "Y" && balance.R_Vat === "V") {
-      let vatAmount = 0
-      let serviceCharge = 0
-      let subTotalAmount = 0
-      let productNonVat = 0
+      // compute RNetTotal
+      let RNetTotal = balance.R_Price * balance.R_Quan
+      let sumDiscountAll = balance.R_DiscBath + balance.R_PrSubAmt + balance.R_PrAmt
 
-      if (serviceType === "N" && vatType === "I") { // คิด service แบบ Net & คิด vat แบบ Include
-        productNonVat = RNetTotal  // ถอด vat ออกจากสินค้า
-        let totalAmount = RNetTotal - balance.R_DiscBath // ลบส่วนลด
-        serviceCharge = totalAmount * service / 100 // คิด service หลังจากหักส่วนลด
-        totalAmount = totalAmount + serviceCharge
-        vatAmount = RNetTotal*vat/(100+vat)
-        subTotalAmount = totalAmount
-      } else if (serviceType === "N" && vatType === "E") { // คิด service แบบ Net & คิด vat แบบ Exclude
-        productNonVat = RNetTotal
-        let totalAmount = RNetTotal - balance.R_DiscBath
-        serviceCharge = totalAmount * service / 100
-        totalAmount = totalAmount + serviceCharge
-        vatAmount = totalAmount*vat/100
-        subTotalAmount = totalAmount + vatAmount
-      } else if (serviceType === "G" && vatType === "I") { // คิด service แบบ Gross & คิด vat แบบ Include
-        productNonVat = RNetTotal - RNetTotal*vat/(100+vat)// ถอด vat ออกจากสินค้า
-        let totalAmount = productNonVat - balance.R_DiscBath
-        serviceCharge = RNetTotal * service/100
-        totalAmount = totalAmount + serviceCharge
-        vatAmount = totalAmount * vat/100
-        subTotalAmount = totalAmount + vatAmount
-      } else if (serviceType === "G" && vatType === "E") { // คิด service แบบ Net & คิด vat แบบ Exclude
-        let totalAmount = RNetTotal - balance.R_DiscBath
-        serviceCharge = RNetTotal * service/100
-        totalAmount = totalAmount + serviceCharge
-        vatAmount = totalAmount * vat/100
-        subTotalAmount = totalAmount + vatAmount
-      }
+      if (balance.R_Service === "Y" && balance.R_Vat === "V") {
+        let vatAmount = 0
+        let serviceCharge = 0
+        let subTotalAmount = 0
+        let productNonVat = 0
 
-      totalDiscountAmount += balance.R_DiscBath
-      totalServiceAmount += serviceCharge
-      totalVatAmount += vatAmount
-      totalProductNoneVatAmount += productNonVat
-      netTotalAmount += subTotalAmount
-    } else if (balance.R_Service === "Y" && balance.R_Vat === "N") { // ไม่คิดภาษี
-      let vatAmount = 0
-      let serviceCharge = 0
-      let subTotalAmount = 0
-      let productNonVat = RNetTotal
+        if (serviceType === "N" && vatType === "I") { // คิด service แบบ Net & คิด vat แบบ Include
+          productNonVat = RNetTotal  // ถอด vat ออกจากสินค้า
+          let totalAmount = RNetTotal - sumDiscountAll // ลบส่วนลด
+          serviceCharge = totalAmount * service / 100 // คิด service หลังจากหักส่วนลด
+          totalAmount = totalAmount + serviceCharge
+          vatAmount = RNetTotal*vat/(100+vat)
+          subTotalAmount = totalAmount
+        } else if (serviceType === "N" && vatType === "E") { // คิด service แบบ Net & คิด vat แบบ Exclude
+          productNonVat = RNetTotal
+          let totalAmount = RNetTotal - sumDiscountAll
+          serviceCharge = totalAmount * service / 100
+          totalAmount = totalAmount + serviceCharge
+          vatAmount = totalAmount*vat/100
+          subTotalAmount = totalAmount + vatAmount
+        } else if (serviceType === "G" && vatType === "I") { // คิด service แบบ Gross & คิด vat แบบ Include
+          productNonVat = RNetTotal - RNetTotal*vat/(100+vat)// ถอด vat ออกจากสินค้า
+          let totalAmount = productNonVat - sumDiscountAll
+          serviceCharge = RNetTotal * service/100
+          totalAmount = totalAmount + serviceCharge
+          vatAmount = totalAmount * vat/100
+          subTotalAmount = totalAmount + vatAmount
+        } else if (serviceType === "G" && vatType === "E") { // คิด service แบบ Net & คิด vat แบบ Exclude
+          let totalAmount = RNetTotal - sumDiscountAll
+          serviceCharge = RNetTotal * service/100
+          totalAmount = totalAmount + serviceCharge
+          vatAmount = totalAmount * vat/100
+          subTotalAmount = totalAmount + vatAmount
+        }
 
-      if (serviceType === "N") { // คิด service แบบ Net
+        totalDiscountAmount += sumDiscountAll
+        totalItemDiscAmount += balance.R_PrAmt
+        totalServiceAmount += serviceCharge
+        totalVatAmount += vatAmount
+        totalProductNoneVatAmount += productNonVat
+        netTotalAmount += subTotalAmount
+      } else if (balance.R_Service === "Y" && balance.R_Vat === "N") { // ไม่คิดภาษี
+        let vatAmount = 0
+        let serviceCharge = 0
+        let subTotalAmount = 0
+        let productNonVat = RNetTotal
+
+        if (serviceType === "N") { // คิด service แบบ Net
+            if (vatType === "I") {
+              productNonVat = productNonVat = RNetTotal - (RNetTotal * vat / (100 + vat))
+              let totalAmount = productNonVat - balance.R_DiscBath
+              serviceCharge = totalAmount * service / 100
+              subTotalAmount = totalAmount + serviceCharge
+            } else if(vatType === "E") {
+              let totalAmount = RNetTotal - balance.R_DiscBath
+              serviceCharge = totalAmount * service / 100
+              subTotalAmount = totalAmount + serviceCharge
+            }
+        } else if (serviceType === "G") { // คิด service แบบ Gross
           if (vatType === "I") {
             productNonVat = productNonVat = RNetTotal - (RNetTotal * vat / (100 + vat))
             let totalAmount = productNonVat - balance.R_DiscBath
-            serviceCharge = totalAmount * service / 100
+            serviceCharge = RNetTotal * service/100
             subTotalAmount = totalAmount + serviceCharge
           } else if(vatType === "E") {
             let totalAmount = RNetTotal - balance.R_DiscBath
-            serviceCharge = totalAmount * service / 100
+            serviceCharge = RNetTotal * service/100
             subTotalAmount = totalAmount + serviceCharge
           }
-      } else if (serviceType === "G") { // คิด service แบบ Gross
-        if (vatType === "I") {
-          productNonVat = productNonVat = RNetTotal - (RNetTotal * vat / (100 + vat))
+        }
+
+        totalDiscountAmount += balance.R_DiscBath
+        totalItemDiscAmount += balance.R_PrAmt
+        totalServiceAmount += serviceCharge
+        totalVatAmount += 0
+        totalProductNoneVatAmount += productNonVat
+        netTotalAmount += subTotalAmount
+      } else if (balance.R_Service === "N" && balance.R_Vat === "V") { // ไม่คิด Service
+        let serviceCharge = 0
+        let vatAmount = 0
+        let subTotalAmount = 0
+        let productNonVat = 0
+
+        if (vatType === "I") { // คิด vat แบบ Include
+          productNonVat = RNetTotal - (RNetTotal * vat / (100 + vat))
           let totalAmount = productNonVat - balance.R_DiscBath
-          serviceCharge = RNetTotal * service/100
-          subTotalAmount = totalAmount + serviceCharge
-        } else if(vatType === "E") {
+          vatAmount = totalAmount * vat / 100
+          subTotalAmount = totalAmount + vatAmount
+        } else if (vatType === "E") { // คิด vat แบบ Exclude
           let totalAmount = RNetTotal - balance.R_DiscBath
-          serviceCharge = RNetTotal * service/100
-          subTotalAmount = totalAmount + serviceCharge
+          vatAmount = totalAmount * vat / 100
+          subTotalAmount = totalAmount + vatAmount
+        }
+
+        totalDiscountAmount += balance.R_DiscBath
+        totalItemDiscAmount += balance.R_PrAmt
+        totalServiceAmount += serviceCharge
+        totalVatAmount += vatAmount
+        totalProductNoneVatAmount += productNonVat
+        netTotalAmount += subTotalAmount
+      } else if (balance.R_Service === "N" && balance.R_Vat === "N") { // ไม่คิดภาษี และ Service
+        totalServiceAmount += 0
+        totalVatAmount += 0
+        totalProductNoneVatAmount += RNetTotal
+        netTotalAmount += RNetTotal
+      }
+
+      if (balance.R_Type === '1') {
+        Food += RNetTotal
+        if (balance.R_Service === "Y") {
+          FoodService = RNetTotal
+        }
+        if (balance.R_Vat === "V") {
+          FoodVat = RNetTotal
+        }
+      } else if (balance.R_Type === '2') {
+        Drink += RNetTotal
+        if (balance.R_Service === "Y") {
+          DrinkService = RNetTotal
+        }
+        if (balance.R_Vat === "V") {
+          DrinkVat = RNetTotal
+        }
+      } else if (balance.R_Type === '3') {
+        Product += RNetTotal
+        if (balance.R_Service === "Y") {
+          ProductService = RNetTotal
+        }
+        if (balance.R_Vat === "V") {
+          ProductVat = RNetTotal
         }
       }
 
-      totalDiscountAmount += balance.R_DiscBath
-      totalServiceAmount += serviceCharge
-      totalVatAmount += 0
-      totalProductNoneVatAmount += productNonVat
-      netTotalAmount += subTotalAmount
-    } else if (balance.R_Service === "N" && balance.R_Vat === "V") { // ไม่คิด Service
-      let serviceCharge = 0
-      let vatAmount = 0
-      let subTotalAmount = 0
-      let productNonVat = 0
-
-      if (vatType === "I") { // คิด vat แบบ Include
-        productNonVat = RNetTotal - (RNetTotal * vat / (100 + vat))
-        let totalAmount = productNonVat - balance.R_DiscBath
-        vatAmount = totalAmount * vat / 100
-        subTotalAmount = totalAmount + vatAmount
-      } else if (vatType === "E") { // คิด vat แบบ Exclude
-        let totalAmount = RNetTotal - balance.R_DiscBath
-        vatAmount = totalAmount * vat / 100
-        subTotalAmount = totalAmount + vatAmount
-      }
-
-      totalDiscountAmount += balance.R_DiscBath
-      totalServiceAmount += serviceCharge
-      totalVatAmount += vatAmount
-      totalProductNoneVatAmount += productNonVat
-      netTotalAmount += subTotalAmount
-    } else if (balance.R_Service === "N" && balance.R_Vat === "N") { // ไม่คิดภาษี และ Service
-      totalServiceAmount += 0
-      totalVatAmount += 0
-      totalProductNoneVatAmount += RNetTotal
-      netTotalAmount += RNetTotal
-    }
-
-    if (balance.R_Type === '1') {
-      Food += RNetTotal
-      if (balance.R_Service === "Y") {
-        FoodService = RNetTotal
-      }
-      if (balance.R_Vat === "V") {
-        FoodVat = RNetTotal
-      }
-    } else if (balance.R_Type === '2') {
-      Drink += RNetTotal
-      if (balance.R_Service === "Y") {
-        DrinkService = RNetTotal
-      }
-      if (balance.R_Vat === "V") {
-        DrinkVat = RNetTotal
-      }
-    } else if (balance.R_Type === '3') {
-      Product += RNetTotal
-      if (balance.R_Service === "Y") {
-        ProductService = RNetTotal
-      }
-      if (balance.R_Vat === "V") {
-        ProductVat = RNetTotal
-      }
     }
   })
 
@@ -341,6 +350,7 @@ const computeBalanceSummary = (
     ProductVat,
     totalProductNoneVatAmount,
     totalDiscountAmount,
+    totalItemDiscAmount,
     totalServiceAmount,
     totalVatAmount,
     netTotalAmount
@@ -371,6 +381,7 @@ const summaryBalance = async (tableNo, macno) => {
   let ProductVat = 0
 
   let totalDiscountAmount = 0
+  let totalItemDiscAmount = 0
   let totalServiceAmount = 0
   let totalVatAmount = 0
   let totalProductNoneVatAmount = 0
@@ -389,6 +400,7 @@ const summaryBalance = async (tableNo, macno) => {
     DrinkVat,
     ProductVat,
     totalDiscountAmount,
+    totalItemDiscAmount,
     totalServiceAmount,
     totalVatAmount,
     totalProductNoneVatAmount,
@@ -404,7 +416,7 @@ const summaryBalance = async (tableNo, macno) => {
     DiscBath, ProDiscAmt, SpaDiscAmt, CuponDiscAmt
   } = tablefile
   const discountAmount = EmpDiscAmt + FastDiscAmt + TrainDiscAmt + MemDiscAmt + SubDiscAmt + 
-  DiscBath + ProDiscAmt + SpaDiscAmt + CuponDiscAmt + responseData.totalDiscountAmount
+  DiscBath + ProDiscAmt + SpaDiscAmt + CuponDiscAmt + responseData.totalItemDiscAmount
   // end compute discount ท้ายบิล
 
   tablefile.MacNo = macno
@@ -412,9 +424,9 @@ const summaryBalance = async (tableNo, macno) => {
   tablefile.Vat = vat
   tablefile.TAmount = responseData.Food + responseData.Drink + responseData.Product
   tablefile.ServiceAmt = responseData.totalServiceAmount
-  tablefile.ItemDiscAmt = responseData.totalDiscountAmount
+  tablefile.ItemDiscAmt = responseData.totalItemDiscAmount
   tablefile.VatAmt = responseData.totalVatAmount
-  tablefile.NetTotal = responseData.netTotalAmount - discountAmount
+  tablefile.NetTotal = responseData.netTotalAmount
   tablefile.Food = responseData.Food
   tablefile.Drink = responseData.Drink
   tablefile.Product = responseData.Product

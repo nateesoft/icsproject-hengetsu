@@ -1,4 +1,5 @@
-const pool = require('../../../config/database/MyCrmDB')
+const pool = require('../../../config/database/MyCrmDB');
+const { getMoment } = require('../../../utils/MomentUtil');
 
 const createMtran = async payload => {
     const { Service_Date, Receipt_No, Member_Code, Branch_Code, Sale_Type, GrossAmount, DiscountAmount,
@@ -34,7 +35,43 @@ const updateMtran = async payload => {
     return result
 }
 
+const getReportCashier = async (cashier, branchCode) => {
+    const sql = `SELECT Employee_Code, 
+          COUNT(Member_Code) TotalMember, 
+          SUM(NetAmount) NetAmount, 
+          SUM(Score) TotalScore 
+          FROM mtran 
+          WHERE Service_Date='${getMoment().format("YYYY-MM-DD")}' 
+          AND Employee_Code='${cashier}' 
+          AND Branch_Code='${branchCode}' 
+          GROUP BY Employee_Code`;
+    const result = await pool.query(sql)
+    if(result.length>0){
+      return result[0]
+    }
+    return {}
+}
+
+const getReportTerminal = async (macno, branchCode) => {
+    const sql = `SELECT Mechine_Code, 
+          COUNT(Member_Code) TotalMember, 
+          SUM(NetAmount) NetAmount, 
+          SUM(Score) TotalScore 
+          FROM mtran 
+          WHERE Service_Date='${getMoment().format("YYYY-MM-DD")}' 
+          AND Mechine_Code='${macno}' 
+          AND Branch_Code='${branchCode}' 
+          GROUP BY Mechine_Code`;
+    const result = await pool.query(sql)
+    if(result.length>0){
+      return result[0]
+    }
+    return {}
+}
+
 module.exports = {
     createMtran,
-    updateMtran
+    updateMtran,
+    getReportCashier,
+    getReportTerminal
 }

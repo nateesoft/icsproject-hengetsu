@@ -325,7 +325,7 @@ const addNewBalance = async payload => {
 
     const R_PrCuCode = "";
     const R_PrChkType = "";
-    const R_PrQuan = 1;
+    const R_PrQuan = 0;
     const R_PrSubType = "";
     const R_PrSubCode = "";
     const R_PrSubQuan = 0;
@@ -400,8 +400,8 @@ const updateChangeTypeMenu = async (R_Table, R_ETD, macno, R_Index) => {
 const updateBalanceDetail = async payload => {
     const { oldBalance, discount, optList = [], specialText = "", macno, userLogin, empCode, R_ETD } = payload
     const { R_Index, R_Table, R_PluCode, R_PName, R_Unit, R_Group, R_Status, R_Normal, R_Discount,
-        R_Service, R_Stock, R_Set, R_Vat, R_Type, R_Price, R_Total, R_PrType, R_PrCode,
-        R_PrDisc, R_PrBath, R_PrAmt, R_DiscBath, R_PrCuType, R_PrCuQuan, R_PrCuAmt, R_Redule, R_Kic,
+        R_Service, R_Stock, R_Set, R_Vat, R_Type, R_Price, R_PrType, R_PrCode,
+        R_DiscBath, R_PrCuType, R_PrCuQuan, R_PrCuAmt, R_Redule, R_Kic,
         R_KicPrint, R_Void, R_VoidUser, R_VoidTime, FieldName, R_PrCuCode, R_Serve, R_PrintOK, R_KicOK,
         StkCode, PosStk, R_PrChkType, R_PrQuan, R_PrSubType, R_PrSubCode, R_PrSubQuan, R_PrSubDisc,
         R_PrSubBath, R_PrSubAmt, R_PrSubAdj, R_PrCuDisc, R_PrCuBath, R_PrCuAdj, R_Order,
@@ -432,15 +432,17 @@ const updateBalanceDetail = async payload => {
 
     let newRTotal = R_Price * R_Quan
 
-    let RPrDisc = R_PrDisc
-    let RPrBath = R_PrBath
-    let RPrAmt = R_PrAmt
+    let RPrDisc = 0
+    let RPrBath = 0
 
     // for discount
     let RPrType = R_PrType || ''
     let newDiscountBaht = 0
+    let RQuanCanDisc = R_QuanCanDisc
+    let RPrQuan = R_PrQuan
     if (R_Discount === 'Y') {
         if (discount.discountPercent > 0) {
+            RPrDisc = discount.discountPercent
             newDiscountBaht = newRTotal * parseFloat(discount.discountPercent) / 100
         } else if(discount.discountBaht > 0) {
             newDiscountBaht = discount.discountBaht
@@ -448,14 +450,12 @@ const updateBalanceDetail = async payload => {
 
         if(newDiscountBaht>0){
             RPrType = '-I'
+            RQuanCanDisc = RQuanCanDisc - R_Quan
+            RPrQuan = RPrQuan + R_Quan
         }else{
             RPrType = ''
         }
     }
-    
-    
-
-    newRTotal = newRTotal - newDiscountBaht
 
     const sql = `UPDATE balance 
         SET R_Index='${R_Index}',R_Table='${R_Table}',R_Date='${R_Date}',R_Time='${R_Time}',
@@ -464,18 +464,18 @@ const updateBalanceDetail = async payload => {
         R_Normal='${R_Normal}',R_Discount='${R_Discount}',R_Service='${R_Service}',R_Stock='${R_Stock}',
         R_Set='${R_Set}',R_Vat='${R_Vat}',R_Type='${R_Type}',R_ETD='${R_ETD}',R_Quan='${R_Quan}',
         R_Price='${R_Price}',R_Total='${newRTotal}',R_PrType='${RPrType}',R_PrCode='${R_PrCode}',
-        R_PrDisc='${RPrDisc}',R_PrBath='${RPrBath}',R_PrAmt='${RPrAmt}',R_DiscBath='${R_DiscBath}',
+        R_PrDisc='${RPrDisc}',R_PrBath='${RPrBath}',R_PrAmt='${newDiscountBaht}',R_DiscBath='${R_DiscBath}',
         R_PrCuType='${R_PrCuType}',R_PrCuQuan='${R_PrCuQuan}',R_PrCuAmt='${R_PrCuAmt}',
         R_Redule='${R_Redule}',R_Kic='${R_Kic}',R_KicPrint='${R_KicPrint}',R_Void='${R_Void}',
         R_VoidUser='${R_VoidUser}',R_VoidTime='${R_VoidTime}',FieldName='${FieldName}',
         R_Opt1='${R_Opt1}',R_Opt2='${R_Opt2}',R_Opt3='${R_Opt3}',R_Opt4='${R_Opt4}',R_Opt5='${R_Opt5}',
         R_Opt6='${R_Opt6}',R_Opt7='${R_Opt7}',R_Opt8='${R_Opt8}',R_Opt9='${R_Opt9}',
         R_PrCuCode='${R_PrCuCode}',R_Serve='${R_Serve}',R_PrintOK='${R_PrintOK}',R_KicOK='${R_KicOK}',
-        StkCode='${StkCode}',PosStk='${PosStk}',R_PrChkType='${R_PrChkType}',R_PrQuan='${R_PrQuan}',
+        StkCode='${StkCode}',PosStk='${PosStk}',R_PrChkType='${R_PrChkType}',R_PrQuan='${RPrQuan}',
         R_PrSubType='${R_PrSubType}',R_PrSubCode='${R_PrSubCode}',R_PrSubQuan='${R_PrSubQuan}',
         R_PrSubDisc='${R_PrSubDisc}',R_PrSubBath='${R_PrSubBath}',R_PrSubAmt='${R_PrSubAmt}',
         R_PrSubAdj='${R_PrSubAdj}',R_PrCuDisc='${R_PrCuDisc}',R_PrCuBath='${R_PrCuBath}',
-        R_PrCuAdj='${R_PrCuAdj}',R_QuanCanDisc='${R_QuanCanDisc}',R_Order='${R_Order}',
+        R_PrCuAdj='${R_PrCuAdj}',R_QuanCanDisc='${RQuanCanDisc}',R_Order='${R_Order}',
         R_PItemNo='${R_PItemNo}',R_PKicQue='${R_PKicQue}',R_MemSum='${R_MemSum}',R_PrVcType='${R_PrVcType}',
         R_PrVcCode='${R_PrVcCode}',R_PrVcAmt='${R_PrVcAmt}',R_PrVcAdj='${R_PrVcAdj}',
         R_VoidQuan='${R_VoidQuan}',R_MoveFlag='${R_MoveFlag}',R_MovePrint='${R_MovePrint}',

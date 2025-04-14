@@ -29,7 +29,7 @@ const configDb = {
 }
 // const poolPOS = mysqlConnectionPOS.createConnection(configDb);
 const poolPOS = mysqlConnectionPOS.createPool(configDb);
-console.log('MySqlConnect config:', configDb)
+// console.log('MySqlConnect config:', configDb)
 
 poolPOS.query("SELECT 5+0 AS solution", function (error, results, fields) {
   if (error) {

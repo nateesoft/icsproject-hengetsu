@@ -9,6 +9,10 @@ const formatNumber = (num) => {
   }).format(num);
 };
 
+const formatPoint = (point) => {
+  return point.toLocaleString()
+}
+
 const formatDate = data => {
   return getMoment(data).format("DD/MM/YYYY")
 }
@@ -27,7 +31,6 @@ const truncateWord = (text, maxLength = 25) => {
   }
   return result + "...";
 };
-
 
 const companyLogo = `com_logo.jpg`
 const fontFamily = process.env.RECEIPT_FONT_FAMILY || `Angsana New`
@@ -105,7 +108,6 @@ const printReceiptHtml = async ({ macno, billInfo, tSaleInfo }) => {
         if (tSale.R_PluCode=== 'TIPS') {
           tipsItem += `<font face="${fontFamily}" size="4">${truncateWord(tSale.R_PName)} ... ${formatNumber(tSale.R_Total)}</font>`
         }
-        return
       }
       billTable += `
         <tr>
@@ -124,7 +126,7 @@ const printReceiptHtml = async ({ macno, billInfo, tSaleInfo }) => {
         </tr>`
     })
     
-    billTable += `</div></div>`
+    billTable += `</table></div>`
     tipsItem += `</div>`
 
   const subTotalItems = tSaleInfo.filter(item => item.R_Void !== 'V').length
@@ -217,6 +219,22 @@ const printReceiptHtml = async ({ macno, billInfo, tSaleInfo }) => {
           <table width="100%" cellPadding="0" cellSpacing="0">
             <tr>
               <td>
+                <font face="${fontFamily}" size="4">หักคืนเงินมัดจำ</font>
+              </td>
+              <td align="right">
+                <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_Earnest)}</font>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <font face="${fontFamily}" size="4">ชำระแบบ Entertain</font>
+              </td>
+              <td align="right">
+                <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_Entertain)}</font>
+              </td>
+            </tr>
+            <tr>
+              <td>
                 <font face="${fontFamily}" size="4">เงินสด</font>
               </td>
               <td align="right">
@@ -225,10 +243,128 @@ const printReceiptHtml = async ({ macno, billInfo, tSaleInfo }) => {
             </tr>
             <tr>
               <td>
+                <font face="${fontFamily}" size="4">เงินทอน</font>
+              </td>
+              <td align="right">
+                <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_Ton)}</font>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <font face="${fontFamily}" size="4">เงินโอน</font>
+              </td>
+              <td align="right">
+                <font face="${fontFamily}" size="4">0.00</font>
+              </td>
+            </tr>
+            <tr>
+              <td>
                 <font face="${fontFamily}" size="4">บัตรเครดิต</font>
               </td>
               <td align="right">
                 <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_CrAmt1)}</font>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <font face="${fontFamily}" size="4">ส่วนลดเทศกาล</font>
+              </td>
+              <td align="right">
+                <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_FastDiscAmt)}</font>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <font face="${fontFamily}" size="4">ส่วนลดพนักงาน</font>
+              </td>
+              <td align="right">
+                <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_EmpDiscAmt)}</font>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <font face="${fontFamily}" size="4">ส่วนลดสมาชิก (VIP)</font>
+              </td>
+              <td align="right">
+                <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_MemDiscAmt)}</font>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <font face="${fontFamily}" size="4">ส่วนลด TRAINEE</font>
+              </td>
+              <td align="right">
+                <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_TrainDiscAmt)}</font>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <font face="${fontFamily}" size="4">ส่วนลดคูปอง</font>
+              </td>
+              <td align="right">
+                <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_SubDiscAmt)}</font>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <font face="${fontFamily}" size="4">ส่วนลดบาท</font>
+              </td>
+              <td align="right">
+                <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_SubDiscBath)}</font>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <font face="${fontFamily}" size="4">ส่วนลดคูปองพิเศษ</font>
+              </td>
+              <td align="right">
+                <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_CuponDiscAmt)}</font>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <font face="${fontFamily}" size="4">ส่วนลดโปรโมชั่น</font>
+              </td>
+              <td align="right">
+                <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_ProDiscAmt)}</font>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <font face="${fontFamily}" size="4">ส่วนลดรายการ</font>
+              </td>
+              <td align="right">
+                <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_ItemDiscAmt)}</font>
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
+      ${Divider}
+      <div align="center">
+          <table width="100%" cellPadding="0" cellSpacing="0">
+            <tr>
+              <td>
+                <font face="${fontFamily}" size="4">สมาชิก</font>
+              </td>
+              <td align="right">
+                <font face="${fontFamily}" size="4">${billInfo.B_MemCode}</font>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <font face="${fontFamily}" size="4"></font>
+              </td>
+              <td align="right">
+                <font face="${fontFamily}" size="4">${billInfo.B_MemName}</font>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <font face="${fontFamily}" size="4">คะแนนสะสม</font>
+              </td>
+              <td align="right">
+                <font face="${fontFamily}" size="4">${formatPoint(billInfo.B_MemCurSum)}</font>
               </td>
             </tr>
           </table>
@@ -253,10 +389,13 @@ const printReceiptCopyHtml = async ({ macno, billInfo, tSaleInfo }) => {
 }
 
 const printReviewReceiptHtml = async ({ macno, tableInfo, balanceInfo }) => {
-  const posConfigSetup = await getPOSConfigSetup()
   const poshwSetup = await getDataByMacno(macno)
   let headers = [poshwSetup.Heading1||"", poshwSetup.Heading2||"", poshwSetup.Heading3||"", poshwSetup.Heading4||""]
   headers = headers.filter(h => h !== "")
+
+  const tipsTotalAmount = balanceInfo.reduce((sum, item) => {
+    return (item.R_PluCode==='TIPS') ? sum + item.R_Total : sum
+  }, 0)
 
   let header = `
     <div align="center">
@@ -302,27 +441,28 @@ const printReviewReceiptHtml = async ({ macno, tableInfo, balanceInfo }) => {
             <font face="${fontFamily}" size="4">Amount</font>
           </th>
         </tr>`
-        balanceInfo && balanceInfo.forEach(balance => {
-          if(balanceInfo.R_Void === 'V'){
-            return;
-          }
-          billTable += `
-            <tr>
-              <td align="center">
-                <font face="${fontFamily}" size="4">${balance.R_ETD}</font>
-              </td>
-              <td style="left">
-                <font face="${fontFamily}" size="4">${truncateWord(balance.R_PName)}</font>
-              </td>
-              <td align="right">
-                <font face="${fontFamily}" size="4">${balance.R_Quan}</font>
-              </td>
-              <td align="right">
-                <font face="${fontFamily}" size="4">${formatNumber(balance.R_Total)}</font>
-              </td>
-            </tr>`
-        })
-      billTable += `</table></div>`
+  
+  balanceInfo && balanceInfo.forEach(balance => {
+    if (balance.R_Void === 'V' || balance.R_PluCode === 'TIPS') {
+      return
+    }
+    billTable += `
+      <tr>
+        <td align="center">
+          <font face="${fontFamily}" size="4">${balance.R_ETD}</font>
+        </td>
+        <td style="left">
+          <font face="${fontFamily}" size="4">${truncateWord(balance.R_PName)}</font>
+        </td>
+        <td align="right">
+          <font face="${fontFamily}" size="4">${balance.R_Quan}</font>
+        </td>
+        <td align="right">
+          <font face="${fontFamily}" size="4">${formatNumber(balance.R_Total)}</font>
+        </td>
+      </tr>`
+  })
+  billTable += `</table></div>`
 
   const subTotalItems = balanceInfo.filter(item => item.R_Void !== 'V').length
 
@@ -392,10 +532,10 @@ const printReviewReceiptHtml = async ({ macno, tableInfo, balanceInfo }) => {
         </tr>
         <tr>
           <td>
-            <font face="${fontFamily}" size="4">Vat ${posConfigSetup.P_Vat}%</font>
+            <font face="${fontFamily}" size="4">Vat ${tableInfo.Vat}%</font>
           </td>
           <td align="right">
-            <font face="${fontFamily}" size="4">${formatNumber(tableInfo.TAmount * posConfigSetup.P_Vat / 100)}</font>
+            <font face="${fontFamily}" size="4">${formatNumber(tableInfo.VatAmt)}</font>
           </td>
         </tr>
         <tr>
@@ -409,7 +549,7 @@ const printReviewReceiptHtml = async ({ macno, tableInfo, balanceInfo }) => {
       </table>
     </div>
     <div align="center" style="margin: 5px">
-      <font face="${fontFamily}" size="4">Tips ……………………………</font>
+      <font face="${fontFamily}" size="4">Tips ……………${(tipsTotalAmount>0) ? formatNumber(tipsTotalAmount): ""}………………</font>
     </div>
   </div>
   ${footer}
@@ -596,8 +736,25 @@ const printRefundBillHtml = async ({ macno, billInfo, tSaleInfo }) => {
           </tr>
         </table>
       </div>
+      ${Divider}
       <div align="center">
           <table width="100%" cellPadding="0" cellSpacing="0">
+            <tr>
+              <td>
+                <font face="${fontFamily}" size="4">หักคืนเงินมัดจำ</font>
+              </td>
+              <td align="right">
+                <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_Earnest)}</font>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <font face="${fontFamily}" size="4">ชำระแบบ Entertain</font>
+              </td>
+              <td align="right">
+                <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_Entertain)}</font>
+              </td>
+            </tr>
             <tr>
               <td>
                 <font face="${fontFamily}" size="4">เงินสด</font>
@@ -606,7 +763,133 @@ const printRefundBillHtml = async ({ macno, billInfo, tSaleInfo }) => {
                 <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_Cash)}</font>
               </td>
             </tr>
+            <tr>
+              <td>
+                <font face="${fontFamily}" size="4">เงินทอน</font>
+              </td>
+              <td align="right">
+                <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_Ton)}</font>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <font face="${fontFamily}" size="4">เงินโอน</font>
+              </td>
+              <td align="right">
+                <font face="${fontFamily}" size="4">0.00</font>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <font face="${fontFamily}" size="4">บัตรเครดิต</font>
+              </td>
+              <td align="right">
+                <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_CrAmt1)}</font>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <font face="${fontFamily}" size="4">ส่วนลดเทศกาล</font>
+              </td>
+              <td align="right">
+                <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_FastDiscAmt)}</font>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <font face="${fontFamily}" size="4">ส่วนลดพนักงาน</font>
+              </td>
+              <td align="right">
+                <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_EmpDiscAmt)}</font>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <font face="${fontFamily}" size="4">ส่วนลดสมาชิก (VIP)</font>
+              </td>
+              <td align="right">
+                <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_MemDiscAmt)}</font>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <font face="${fontFamily}" size="4">ส่วนลด TRAINEE</font>
+              </td>
+              <td align="right">
+                <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_TrainDiscAmt)}</font>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <font face="${fontFamily}" size="4">ส่วนลดคูปอง</font>
+              </td>
+              <td align="right">
+                <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_SubDiscAmt)}</font>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <font face="${fontFamily}" size="4">ส่วนลดบาท</font>
+              </td>
+              <td align="right">
+                <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_SubDiscBath)}</font>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <font face="${fontFamily}" size="4">ส่วนลดคูปองพิเศษ</font>
+              </td>
+              <td align="right">
+                <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_CuponDiscAmt)}</font>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <font face="${fontFamily}" size="4">ส่วนลดโปรโมชั่น</font>
+              </td>
+              <td align="right">
+                <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_ProDiscAmt)}</font>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <font face="${fontFamily}" size="4">ส่วนลดรายการ</font>
+              </td>
+              <td align="right">
+                <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_ItemDiscAmt)}</font>
+              </td>
+            </tr>
           </table>
+      </div>
+      ${Divider}
+      <div align="center">
+          <table width="100%" cellPadding="0" cellSpacing="0">
+            <tr>
+              <td>
+                <font face="${fontFamily}" size="4">สมาชิก</font>
+              </td>
+              <td align="right">
+                <font face="${fontFamily}" size="4">${billInfo.B_MemCode}</font>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <font face="${fontFamily}" size="4"></font>
+              </td>
+              <td align="right">
+                <font face="${fontFamily}" size="4">${billInfo.B_MemName}</font>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <font face="${fontFamily}" size="4">คะแนนสะสม</font>
+              </td>
+              <td align="right">
+                <font face="${fontFamily}" size="4">${formatPoint(billInfo.B_MemCurSum)}</font>
+              </td>
+            </tr>
+          </table>
+        </div>
       </div>
     </div>
     ${footer}

@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "local": "node --env-file=.env.local ./bin/www",
+    "local": "node ./bin/www",
     "softpos": "node --env-file=.env.prod ./bin/www",
-    "local:watch": "nodemon --trace-warnings --env-file=.env.local ./bin/www",
+    "local:watch": "nodemon --trace-warnings ./bin/www",
     "start:watch": "nodemon ./bin/www"
   },
   "dependencies": {

@@ -29,7 +29,7 @@ const configCrm = {
 }
 // const poolCrm = mysqlConnectionCrm.createConnection(configCrm);
 const poolCrm = mysqlConnectionCrm.createPool(configCrm);
-console.log('MyCrmDB config:', configCrm)
+// console.log('MyCrmDB config:', configCrm)
 
 poolCrm.query("SELECT 5+0 AS solution", function (error, results, fields) {
   if (error) {

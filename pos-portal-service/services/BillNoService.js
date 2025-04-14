@@ -5,7 +5,7 @@ const socket = io(process.env.SOCKETIO_SERVER, {
   autoConnect: true
 })
 const pool = require("../config/database/MySqlConnect")
-const { PrefixZeroFormat, Unicode2ASCII } = require("../utils/StringUtil")
+const { PrefixZeroFormat, Unicode2ASCII, ASCII2Unicode } = require("../utils/StringUtil")
 const { emptyTableBalance, getBalanceByTableNo } = require("./BalanceService")
 
 const {
@@ -25,7 +25,8 @@ const { ProcessStockOut } = require("./STCardService")
 const { getPOSConfigSetup } = require("./POSConfigSetupService")
 const {
   updateRefundMember,
-  updateMemberData
+  updateMemberData,
+  getDataByMemberCode
 } = require("./member/crm/MemberMasterService")
 const { getMoment } = require("../utils/MomentUtil")
 const { summaryBalance } = require("./CoreService")
@@ -64,10 +65,13 @@ const getBillNoByTableNo = async (tableNo) => {
 const getBillNoByRefno = async (billNo) => {
   const sql = `select * from billno where B_Refno='${billNo}'`
   const results = await pool.query(sql)
-  if (results.length > 0) {
-    return results[0]
-  }
-  return null
+  const mappingResult = results.map((item, index) => {
+      return { 
+          ...item, 
+          B_MemName: ASCII2Unicode(item.B_MemName)
+      }
+  })
+  return mappingResult[0]
 }
 
 const getBillNoByRefnoExist = async (billNo) => {
@@ -91,6 +95,14 @@ const updateNextBill = async (macno) => {
   const sql = `UPDATE poshwsetup SET receno1=receno1+1 WHERE terminal='${macno}' `
   const results = await pool.query(sql)
   return results
+}
+
+const updateMemberPoint = async (memberCode, totalScore, billNo) => {
+  const sql = `UPDATE billno 
+    SET B_MemCode='${memberCode}', B_MemCurSum='${totalScore}' 
+    WHERE B_Refno='${billNo}'`
+  const result = await pool.query(sql)
+  return result
 }
 
 const printCopyBill = async (billNo, Cashier, macno, copy) => {
@@ -212,7 +224,8 @@ const addNewBill = async (payload) => {
     B_Entertain,
     B_UserEntertain,
     B_Earnest,
-    creditList
+    creditList,
+    specialCuponInfo
   } = payload
   const { Code: branchCode } = branchInfo
   const tableFile = await getTableByCode(tableNo)
@@ -243,7 +256,12 @@ const addNewBill = async (payload) => {
     await emptyBillNoTSale(B_Refno)
   }
 
-  const B_CuponDiscAmt = 0
+  // list all balance
+  const allBalance = await getBalanceByTableNo(tableNo)
+
+  const B_CuponDiscAmt = allBalance.reduce((sum, item) => {
+    return (item.R_PrCuType === '-C') ? sum + item.R_PrCuAmt: sum
+  }, 0)
   const B_Ontime = curtime
   const B_LoginTime = curtime
   const B_OnDate = curdate
@@ -390,9 +408,7 @@ const addNewBill = async (payload) => {
         '${VoidMsg}','${B_EarnDocNo}','${B_UseEarnNo}','${B_UserEntertain}','${B_SendOnline}')`
   const results = await pool.query(sql)
   if (results) {
-    // list all balance
-    const allBalance = await getBalanceByTableNo(tableNo)
-
+    
     // save t_sale list
     await addDataFromBalance(B_Table, B_Refno, allBalance)
 
@@ -409,7 +425,7 @@ const addNewBill = async (payload) => {
 
     if (Object.keys(memberInfo).length > 0) {
       // update member memmaster
-      updateMemberData(
+      await updateMemberData(
         B_NetTotal,
         B_MemCode,
         B_MacNo,
@@ -420,11 +436,17 @@ const addNewBill = async (payload) => {
         B_Total,
         B_ServiceAmt,
         B_MemDiscAmt,
-        empCode,
+        B_Cashier,
         B_OnDate,
         B_Ontime,
         memberInfo
       )
+    }
+
+    // get current member score
+    const memberCurrent = await getDataByMemberCode(memberInfo.Member_Code)
+    if(memberCurrent){
+      await updateMemberPoint(memberInfo.Member_Code, memberCurrent.Member_TotalScore, B_Refno)
     }
 
     // update next bill id

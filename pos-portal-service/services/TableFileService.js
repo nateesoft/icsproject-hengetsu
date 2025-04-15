@@ -224,7 +224,13 @@ const checkTableOpen = async (tableNo) => {
       table: results[0],
       tableList: listTables
     }
+  } else if (listTables.length > 0) {
+    return {
+      table: listTables[0],
+      tableList: listTables
+    }
   }
+  
   return null
 }
 

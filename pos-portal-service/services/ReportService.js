@@ -1,5 +1,6 @@
 const pool = require("../config/database/MySqlConnect")
 const { getMoment } = require("../utils/MomentUtil")
+const { ASCII2Unicode } = require("../utils/StringUtil")
 const { getBranch } = require("./BranchService")
 const { getReportCashier, getReportTerminal } = require("./member/crm/MTranService")
 
@@ -223,7 +224,7 @@ const summaryETD = (results, dataList) => {
   results.map((item) => {
     dataList.push({
       data1: item.R_Group + getGroupName(item.GroupName),
-      data2: item.GroupName,
+      data2: "",
       data3: "",
       data4: ""
     })
@@ -266,13 +267,11 @@ const getGroupPlu = async (
   groupCode2
 ) => {
   let sql = `SELECT ts.R_ETD, ts.R_Group, g.GroupName, 
-            SUM(ts.R_Total) R_Total 
-            FROM billno b 
+            SUM(ts.R_Total) R_Total FROM billno b 
             INNER JOIN t_sale ts on b.B_Refno =ts.R_Refno 
             LEFT JOIN groupfile g on ts.R_Group = g.GroupCode 
-            WHERE ts.R_Date='${getMoment().format(
-              "YYYY-MM-DD"
-            )}' and ts.R_Void <> 'V' `
+            WHERE ts.R_Date='${getMoment().format( "YYYY-MM-DD")}' 
+            and ts.R_Void <> 'V'`
   if (macno1 && macno2) {
     sql = sql + ` and ts.MacNo between '${macno1}' and '${macno2}' `
   }
@@ -327,13 +326,20 @@ const getPluCode = async (
   }
   sql += ` group by ts.R_Group, ts.R_PluCode, ts.R_PName`
   const results = await pool.query(sql)
+  const mappingResult = results.map((item, index) => {
+    return {
+      ...item,
+      GroupName: ASCII2Unicode(item.GroupName),
+      R_PName: ASCII2Unicode(item.R_PName),
+    }
+  })
   const sumQty = results.reduce((partialSum, a) => partialSum + a.R_Quan, 0)
   const sumNetTotal = results.reduce(
     (partialSum, a) => partialSum + a.R_Total,
     0
   )
   return {
-    data: results,
+    data: mappingResult,
     summary: {
       qty: sumQty,
       netTotal: sumNetTotal

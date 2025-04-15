@@ -48,6 +48,18 @@ const updateBalanceSplitBill = async (balanceData, sourceTableNo) => {
     R_Table='${balanceData.R_Table}' 
     where R_Table='${sourceTableNo}' and R_Index='${balanceData.R_Index}'`
   const results = await pool.query(sql)
+
+  // check R_LinkIndex
+  const sqlCheck = `select * from balance where R_LinkIndex='${balanceData.R_Index}'`
+  const resultChk = await pool.query(sqlCheck)
+  for(let index in resultChk){
+    const balance = resultChk[index]
+    const sql = `update balance set 
+      R_Table='${balanceData.R_Table}' 
+      where R_Table='${sourceTableNo}' and R_Index='${balance.R_Index}'`
+      const results1 = await pool.query(sql)
+  }
+
   return results
 }
 

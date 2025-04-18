@@ -2,18 +2,15 @@ const express = require('express');
 const router = express.Router();
 
 const { TOPIC_NAME } = require('../../config/kafka/constants');
-const { printTest, printReceipt, printReceiptProcess } = require('../../services/PrinterService');
+const { printTest, printReceiptProcess } = require('../../services/PrinterService');
 const { getBillNoByRefno } = require('../../services/BillNoService');
 const { getPOSConfigSetup } = require('../../services/CoreService');
 const { getDataByMacno } = require('../../services/PosHwSetup');
 const { getTCreditList } = require('../../services/TCreditService');
 const { getAllTSaleByRefno } = require('../../services/TSaleService');
 const { getDataByMemberCode } = require('../../services/member/crm/MemberMasterService');
-// const kafka = require('../../config/kafka/config');
 
 module.exports = args => {
-  // const producer = kafka.producer()
-  // const adminKafka = kafka.admin()
 
   router.post('/print-test', (req, res) => {
     const config = req.body
@@ -26,20 +23,6 @@ module.exports = args => {
 
   router.post('/createTopic', async (req, res) => {
     const { topicName = TOPIC_NAME } = req.body
-    // try {
-    //   await adminKafka.connect();
-    //   // const listTopics = await adminKafka.listTopics()
-    //   // console.log(listTopics)
-    //   await adminKafka.createTopics({
-    //     timeout: 3000,
-    //     topics: [{ topic: topicName,numPartitions: 1 }]
-    //   });
-    // } catch (error) {
-    //   console.error(error);
-    // } finally {
-    //   await adminKafka.disconnect();
-    // }
-
     res.status(200).json({
       status: "Ok!",
       message: `Create topic ${topicName} success.`,

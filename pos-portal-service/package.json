@@ -36,6 +36,7 @@
     "node-thermal-printer": "^4.4.3",
     "promptpay-qr": "^0.5.0",
     "pug": "2.0.0-beta11",
+    "puppeteer": "^24.6.1",
     "qrcode": "^1.5.4",
     "receiptline": "^1.16.1",
     "socket.io": "^4.8.1",

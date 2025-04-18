@@ -33,7 +33,7 @@ const createPaidIn = async ({ macno, cashier, paidinAmt }) => {
             branchName: `${branch.Code} - ${branch.Name}`,
             cashier, 
             paidInOutAmt: paidinAmt,
-            typeDesc: "นำเงินเข้าลิ้นชัก", 
+            typeDesc: "Cash In", 
             timeProcess: getMoment().format('DD/MM/YYYY HH:mm:ss'), 
             reason: "",
             macno
@@ -69,7 +69,7 @@ const createPaidOut = async ({ macno, cashier, paidoutAmt, reason }) => {
           branchName: `${branch.Code} - ${branch.Name}`,
           cashier, 
           paidInOutAmt: paidoutAmt,
-          typeDesc: "นำเงินออกจากลิ้นชัก", 
+          typeDesc: "Cash Out", 
           timeProcess: getMoment().format('DD/MM/YYYY HH:mm:ss'), 
           reason,
           macno

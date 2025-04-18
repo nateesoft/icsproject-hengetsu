@@ -8,6 +8,7 @@ const {
   summaryBalance
 } = require("./CoreService")
 const { Unicode2ASCII } = require("../utils/StringUtil")
+const { mappingResultDataList, mappingResultData } = require("../utils/ConvertThai")
 
 const getSummaryItem = async (tableNo) => {
   const sql = `select sum(R_Quan) R_Quan 
@@ -37,7 +38,7 @@ const getSummaryItemNoCheckQuanCanDisc = async (tableNo) => {
 const getAllTable = async () => {
   const sql = `select * FROM tablefile ORDER By Tcode`
   const results = await pool.query(sql)
-  return results
+  return mappingResultDataList(results)
 }
 
 const getCheckTableStatus = async () => {
@@ -45,7 +46,7 @@ const getCheckTableStatus = async () => {
     where TOnAct='Y' or TAmount > 0 or TItem > 0 or TCustomer > 0 
     order by Tcode`
   const results = await pool.query(sql)
-  return results
+  return mappingResultDataList(results)
 }
 
 const updateTableAvailableStatus = async (tableNo) => {
@@ -212,7 +213,7 @@ const updateMember = async (memberInfo, tableNo) => {
 const getBalanceAllByTable = async (tableNo) => {
   const sql = `select * from balance  where R_Table='${tableNo}' order by r_index`
   const results = await pool.query(sql)
-  return results
+  return mappingResultDataList(results)
 }
 
 const checkTableOpen = async (tableNo) => {
@@ -320,7 +321,7 @@ const getTableByCode = async (tableNo) => {
   const sql = `select * from tablefile where Tcode='${tableNo}' limit 1`
   const results = await pool.query(sql)
   if (results.length > 0) {
-    return results[0]
+    return mappingResultData(results)
   }
   return null
 }
@@ -328,7 +329,7 @@ const getTableByCode = async (tableNo) => {
 const getListTableByCode = async (tableNo) => {
   const sql = `select * from tablefile where (Tcode like '${tableNo}-%' or Tcode='${tableNo}')`
   const results = await pool.query(sql)
-  return results
+  return mappingResultDataList(results)
 }
 
 const tableMoveOrGroup = async (sourceTable, targetTable, admin, Cashier) => {

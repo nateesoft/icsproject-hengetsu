@@ -1,16 +1,17 @@
 const pool = require('../config/database/MySqlConnect');
 const { getMoment } = require('../utils/MomentUtil');
+const { mappingResultDataList } = require('../utils/ConvertThai');
 
 const getTempCredit = async (macno, tableNo) => {
     const sql = `select * from tempcredit where Mac_No='${macno}' and Ref_No='${tableNo}'`;
     const results = await pool.query(sql)
-    return results
+    return mappingResultDataList(results)
 }
 
 const getTCreditList = async (refNo) => {
     const sql = `select * from t_credit where refno='${refNo}'`;
     const results = await pool.query(sql)
-    return results
+    return mappingResultDataList(results)
 }
 
 const deleteTempCredit = async ({ Terminal, Ref_No, CrCode }) => {

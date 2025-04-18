@@ -1,5 +1,6 @@
 const pool = require('../config/database/MySqlConnect')
 const { decryptData } = require('../utils/StringUtil')
+const { mappingResultData } = require('../utils/ConvertThai')
 const { sendToDirectPrinter } = require('./PrinterService')
 
 const checkLogin = async (username, password, macno) => {
@@ -15,7 +16,9 @@ const checkLogin = async (username, password, macno) => {
             "type": "login",
             "message": "Print logged in."
         })
-        return {...results[0], Password: ""}
+
+        const newResult = mappingResultData(results)
+        return {...newResult, Password: ""}
     }
     return null
 }
@@ -25,7 +28,8 @@ const getLoginAuthen = async (username, password) => {
         where username='${username}' and password='${decryptData(password)}' `
     const results = await pool.query(sql)
     if (results.length > 0) {
-        return {...results[0], Password: ""}
+        const newResult = mappingResultData(results)
+        return {...newResult, Password: ""}
     }
     return null
 }
@@ -45,17 +49,16 @@ const processLogout = async (username) => {
 const getAllData = async () => {
     const sql = `select * from posuser limit 1`;
     const results = await pool.query(sql)
-    const mappingResult = results.map((item, index) => {
-        return { ...item, Password: "" }
-    })
-    return mappingResult
+
+    return mappingResultData(results)
 }
 
 const getDataByUserName = async (username) => {
     const sql = `select * from posuser where username='${username}'`
     const results = await pool.query(sql)
     if (results.length > 0) {
-        return {...results[0], Password: ""}
+        const newResult = mappingResultData(results)
+        return {...newResult, Password: ""}
     }
     return null
 }

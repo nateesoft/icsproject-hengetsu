@@ -1,17 +1,18 @@
 const pool = require('../config/database/MySqlConnect')
-const { ASCII2Unicode, PrefixZeroFormat } = require('../utils/StringUtil')
+require('../utils/StringUtil')
+const { mappingResultDataList, mappingResultData } = require('../utils/ConvertThai')
 
 const getAllTerminal = async () => {
     const sql = `select * from poshwsetup`;
     const results = await pool.query(sql)
-    return results
+    return mappingResultDataList(results)
 }
 
 const getAllData = async () => {
     const sql = `select * from poshwsetup limit 1`;
     const results = await pool.query(sql)
     if (results.length > 0) {
-        return results[0]
+        return mappingResultData(results)
     }
     return null
 }
@@ -20,7 +21,7 @@ const getDataByMacno = async (macno) => {
     const sql = `select * from poshwsetup where Terminal='${macno}' limit 1`
     const results = await pool.query(sql)
     if (results.length > 0) {
-        return results[0]
+        return mappingResultData(results)
     }
     return null
 }
@@ -28,11 +29,8 @@ const getDataByMacno = async (macno) => {
 const getBillNoByMacno = async (macno) => {
     const sql = `select * from poshwsetup where Terminal='${macno}' limit 1`
     const results = await pool.query(sql)
-    let RunningNumber = ""
     if (results.length > 0) {
-        RunningNumber = PrefixZeroFormat(results[0].ReceNo1, 7)
-
-        return {...results[0], Footting3: ASCII2Unicode(results[0].Footting3)}
+        return mappingResultData(results)
     }
     return null
 }

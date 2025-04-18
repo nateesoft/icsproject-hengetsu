@@ -50,37 +50,39 @@ const createPaidIn = async ({ macno, cashier, paidinAmt }) => {
 }
 
 const createPaidOut = async ({ macno, cashier, paidoutAmt, reason }) => {
-    const reasonConv = Unicode2ASCII(reason)
-    const sql = `insert into paidiofile 
-                (date, time, cashier, terminal, flage, paidinamt, paidoutamt, reson) 
-                values ('${getMoment().format('YYYY-MM-DD')}', '${getMoment().format('HH:mm:ss')}', '${cashier}', '${macno}', '${PAID_OUT_TYPE}', '0.00', '${paidoutAmt}', '${reasonConv}')`;
-    const results = await pool.query(sql)
+  const branch = await getBranch()
 
-    // send to printer
-    socket.emit(
-        "printerMessage",
-        JSON.stringify({
-          id: 1,
-          printerType: "receipt",
-          printerName: "cashier",
-          message: await printPaidInOutHtml({
-            branchName: `${branch.Code} - ${branch.Name}`,
-            cashier, 
-            paidInOutAmt: paidoutAmt,
-            typeDesc: "นำเงินออกจากลิ้นชัก", 
-            timeProcess: getMoment().format('DD/MM/YYYY HH:mm:ss'), 
-            reason,
-            macno
-          }),
-          terminal: "",
-          tableNo: "",
-          billNo: "",
-          title: "",
-          billType: ""
-        })
-      )
+  const reasonConv = Unicode2ASCII(reason)
+  const sql = `insert into paidiofile 
+              (date, time, cashier, terminal, flage, paidinamt, paidoutamt, reson) 
+              values ('${getMoment().format('YYYY-MM-DD')}', '${getMoment().format('HH:mm:ss')}', '${cashier}', '${macno}', '${PAID_OUT_TYPE}', '0.00', '${paidoutAmt}', '${reasonConv}')`;
+  const results = await pool.query(sql)
 
-    return results
+  // send to printer
+  socket.emit(
+      "printerMessage",
+      JSON.stringify({
+        id: 1,
+        printerType: "receipt",
+        printerName: "cashier",
+        message: await printPaidInOutHtml({
+          branchName: `${branch.Code} - ${branch.Name}`,
+          cashier, 
+          paidInOutAmt: paidoutAmt,
+          typeDesc: "นำเงินออกจากลิ้นชัก", 
+          timeProcess: getMoment().format('DD/MM/YYYY HH:mm:ss'), 
+          reason,
+          macno
+        }),
+        terminal: "",
+        tableNo: "",
+        billNo: "",
+        title: "",
+        billType: ""
+      })
+    )
+
+  return results
 }
 
 module.exports = {

@@ -1,10 +1,10 @@
-const pool = require('../config/database/MySqlConnect')
+const pool = require('../config/database/MySqlConnect');
+const { mappingResultDataList } = require('../utils/ConvertThai');
 
 const getAllGroup = async () => {
-    const sql = `select GroupCode, GroupName from groupfile 
-        order by GroupCode`;
+    const sql = `select GroupCode, GroupName from groupfile order by GroupCode`;
     const results = await pool.query(sql)
-    return results
+    return mappingResultDataList(results)
 }
 
 const getProductListByGroupCode = async (groupCode) => {
@@ -12,7 +12,7 @@ const getProductListByGroupCode = async (groupCode) => {
         from product p  where p.PGroup='${groupCode}' 
         order by PCode`;
     const results = await pool.query(sql)
-    return results
+    return mappingResultDataList(results)
 }
 
 module.exports = {

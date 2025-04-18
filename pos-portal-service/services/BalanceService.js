@@ -1,11 +1,12 @@
 const pool = require('../config/database/MySqlConnect')
-const { PrefixZeroFormat, Unicode2ASCII, ASCII2Unicode } = require('../utils/StringUtil');
+const { PrefixZeroFormat, Unicode2ASCII } = require('../utils/StringUtil');
 
 const { getProductByPCode } = require('./ProductService');
 const { ProcessStockOut } = require('./STCardService');
 const { processAllPIngredent, processAllPSet, processAllPIngredentReturnStock, processAllPSetReturn, processAllGroupSetReturn } = require('./TSaleService');
 const { getMoment } = require('../utils/MomentUtil');
-const { getBalanceByRIndex, getBalanceMaxIndex, summaryBalance } = require('./CoreService')
+const { getBalanceByRIndex, getBalanceMaxIndex, summaryBalance } = require('./CoreService');
+const { mappingResultDataList } = require('../utils/ConvertThai');
 
 const getTotalBalance = async (tableNo) => {
     const sql = `select sum(R_Total) R_Total from balance where R_Table='${tableNo}'`;
@@ -16,11 +17,11 @@ const getTotalBalance = async (tableNo) => {
     return 0.00
 }
 
-const getSubProductByPluCode = async ({tableNo, rLinkIndex}) => {
+const getSubProductByPluCode = async ({ tableNo, rLinkIndex }) => {
     const sql = `select * from balance where R_Table='${tableNo}' and R_LinkIndex='${rLinkIndex}'`;
     const results = await pool.query(sql)
 
-    return results
+    return mappingResultDataList(results)
 }
 
 const voidListMenuBalanceAll = async ({ menu_code, void_message, Cachier, empCode, macno }) => {
@@ -70,41 +71,25 @@ const voidMenuBalance = async ({ R_Index, Cachier, empCode, voidMsg, macno }) =>
 const getAllBalance = async () => {
     const sql = `select * from balance order by R_Table, R_Index`;
     const results = await pool.query(sql)
-    return results
+    return mappingResultDataList(results)
 }
 
 const getAllBalanceByMenuCode = async (menuCode) => {
     const sql = `select * from balance where R_PluCode='${menuCode}' order by R_Table, R_Index`;
     const results = await pool.query(sql)
-    return results
+    return mappingResultDataList(results)
 }
 
 const getAllBalanceByRLinkIndex = async (rLinkIndex) => {
-    const sql = `select * from balance 
-        where R_LinkIndex='${rLinkIndex}' order by R_Index`;
+    const sql = `select * from balance where R_LinkIndex='${rLinkIndex}' order by R_Index`;
     const results = await pool.query(sql)
-    return results
+    return mappingResultDataList(results)
 }
 
 const getBalanceByTableNo = async tableNo => {
     const sql = `select * from balance where R_Table='${tableNo}' order by R_Table, R_Index`;
     const results = await pool.query(sql)
-    const mappingResult = results.map((item, index) => {
-        return { 
-            ...item, 
-            R_PName: ASCII2Unicode(item.R_PName),
-            R_Opt1: ASCII2Unicode(item.R_Opt1),
-            R_Opt2: ASCII2Unicode(item.R_Opt2),
-            R_Opt3: ASCII2Unicode(item.R_Opt3),
-            R_Opt4: ASCII2Unicode(item.R_Opt4),
-            R_Opt5: ASCII2Unicode(item.R_Opt5),
-            R_Opt6: ASCII2Unicode(item.R_Opt6),
-            R_Opt7: ASCII2Unicode(item.R_Opt7),
-            R_Opt8: ASCII2Unicode(item.R_Opt8),
-            R_Opt9: ASCII2Unicode(item.R_Opt9)
-        }
-    })
-    return mappingResult
+    return mappingResultDataList(results)
 }
 
 const getBalanceGroupProduct = async tableNo => {
@@ -116,22 +101,13 @@ const getBalanceGroupProduct = async tableNo => {
         and R_LinkIndex='' 
         group by R_ETD, R_PluCode, R_PName`;
     const results = await pool.query(sql)
-    const mappingResult = results.map((item, index) => {
-        return { 
-            ...item, 
-            R_PName: ASCII2Unicode(item.R_PName)
-        }
-    })
-    return mappingResult
+    return mappingResultDataList(results)
 }
 
 const getVoidMsgList = async () => {
     const sql = `select * from voidmsg order by VCode`;
     const results = await pool.query(sql)
-    const mappingResult = results.map((item, index) => {
-        return { ...item, VName: ASCII2Unicode(item.VName) }
-    })
-    return mappingResult
+    return mappingResultDataList(results)
 }
 
 const emptyTableBalance = async tableNo => {
@@ -383,14 +359,12 @@ const addNewBalance = async payload => {
 
 const updateChangeTypeMenu = async (R_Table, R_ETD, macno, R_Index) => {
     // update main menu
-    await pool.query(`update balance 
-        set R_ETD='${R_ETD}' where R_Index='${R_Index}'`)
+    await pool.query(`update balance set R_ETD='${R_ETD}' where R_Index='${R_Index}'`)
 
     // check subMenuList
     const subLinkIndex = await getAllBalanceByRLinkIndex(R_Index)
     subLinkIndex.forEach(async item => {
-        await pool.query(`update balance 
-            set R_ETD='${R_ETD}' where R_Index='${item.R_Index}'`)
+        await pool.query(`update balance set R_ETD='${R_ETD}' where R_Index='${item.R_Index}'`)
     })
 
     // summary table

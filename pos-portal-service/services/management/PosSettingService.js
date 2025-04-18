@@ -1,4 +1,5 @@
 const pool = require("../../config/database")
+const { mappingResultDataList, mappingResultData } = require("../../utils/ConvertThai")
 
 const createPosSetting = async (payload) => {
   const {
@@ -74,14 +75,14 @@ const updatePosSetting = async (payload) => {
 const getPosSetting = async () => {
   const sql = `select * from pos_setting`
   const results = await pool.query(sql)
-  return results
+  return mappingResultDataList(results)
 }
 
 const getPosSettingByTerminal = async (terminal_id) => {
   const sql = `select * from pos_setting where terminal_id='${terminal_id}'`
   const results = await pool.query(sql)
   if (results.length > 0) {
-    return results[0]
+    return mappingResultData(results)
   }
   return null
 }

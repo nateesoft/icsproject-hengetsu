@@ -3,6 +3,7 @@ const pool = require('../config/database/MySqlConnect')
 const { getProductByPCode, getProductActiveByPCode } = require('./ProductService');
 const { getBalanceByRIndex } = require('./CoreService');
 const { getMoment } = require('../utils/MomentUtil');
+const { mappingResultDataList, mappingResultData } = require('../utils/ConvertThai');
 
 const curdate = getMoment().format('YYYY-MM-DD')
 const curtime = getMoment().format('HH:mm:ss')
@@ -10,13 +11,13 @@ const curtime = getMoment().format('HH:mm:ss')
 const getSTCard = async () => {
     const sql = `select * from stcard`;
     const results = await pool.query(sql)
-    return results
+    return mappingResultDataList(results)
 }
 
 const getSTCardBySPCode = async (S_PCode) => {
     const sql = `select * from stcard where S_PCode='${S_PCode}'`;
     const results = await pool.query(sql)
-    return results
+    return mappingResultDataList(results)
 }
 
 const SeekStkFile = async (TempCode, T_Stk) => {
@@ -24,7 +25,7 @@ const SeekStkFile = async (TempCode, T_Stk) => {
     where (bpcode='${TempCode}') and (bstk='${T_Stk}') limit 1 `;
     const results = await pool.query(sql)
     if (results.length > 0) {
-        return results[0]
+        return mappingResultData(results)
     }
     return null
 }
@@ -32,14 +33,13 @@ const SeekStkFile = async (TempCode, T_Stk) => {
 const getPSetByPCode = async (TempCode) => {
     const sql = `select * from pset where pcode='${TempCode}'`;
     const results = await pool.query(sql)
-    return results
+    return mappingResultDataList(results)
 }
 
 const getBalanceSetByPCodeRIndex = async (XCode, R_Index) => {
-    const sql = `select * from balanceset 
-    where r_plucode='${XCode}' and r_index='${R_Index}' `;
+    const sql = `select * from balanceset where r_plucode='${XCode}' and r_index='${R_Index}' `;
     const results = await pool.query(sql)
-    return results
+    return mappingResultDataList(results)
 }
 
 const getTSaleSet = async (XCode, r_index, XDocNo) => {
@@ -47,14 +47,14 @@ const getTSaleSet = async (XCode, r_index, XDocNo) => {
     where r_plucode='${XCode}' 
     and r_index='${r_index}'  and r_refno='${XDocNo}' `;
     const results = await pool.query(sql)
-    return results
+    return mappingResultDataList(results)
 }
 
 const getCompany = async () => {
     const sql = `select * from company limit 1`;
     const results = await pool.query(sql)
     if (results.length > 0) {
-        return results[0]
+        return mappingResultData(results)
     }
     return getMoment().format('YYYY-MM-DD')
 }

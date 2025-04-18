@@ -1,4 +1,5 @@
 const pool = require('../config/database/MySqlConnect');
+const { mappingResultDataList } = require('../utils/ConvertThai');
 const { getMoment } = require('../utils/MomentUtil');
 const { Unicode2ASCII, ASCII2Unicode } = require('../utils/StringUtil');
 const { listIngredeint, getPSetByPCode, getPCategoryByRLinkIndex } = require('./ProductService');
@@ -7,29 +8,15 @@ const { ProcessStockOut } = require('./STCardService');
 const getAllTSale = async () => {
     const sql = `select * from t_sale order by R_Index`
     const results = await pool.query(sql)
-    return results
+    
+    return mappingResultDataList(results)
 }
 
 const getAllTSaleByRefno = async (refno) => {
     const sql = `select * from t_sale where R_Refno='${refno}' order by R_Index`
     const results = await pool.query(sql)
-    const mappingResult = results.map((item, index) => {
-        return { 
-            ...item,
-            R_PName: ASCII2Unicode(item.R_PName) ,
-            R_Opt1: ASCII2Unicode(item.R_Opt1) ,
-            R_Opt2: ASCII2Unicode(item.R_Opt2) ,
-            R_Opt3: ASCII2Unicode(item.R_Opt3) ,
-            R_Opt4: ASCII2Unicode(item.R_Opt4) ,
-            R_Opt5: ASCII2Unicode(item.R_Opt5) ,
-            R_Opt6: ASCII2Unicode(item.R_Opt6) ,
-            R_Opt7: ASCII2Unicode(item.R_Opt7) ,
-            R_Opt8: ASCII2Unicode(item.R_Opt8) ,
-            R_Opt9: ASCII2Unicode(item.R_Opt9) ,
-            VoidMsg: ASCII2Unicode(item.VoidMsg)
-        }
-    })
-    return mappingResult
+
+    return mappingResultDataList(results)
 }
 
 const createNewTSale = async (balance, BillRefNo) => {

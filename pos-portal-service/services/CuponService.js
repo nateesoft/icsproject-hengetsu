@@ -1,6 +1,7 @@
 const pool = require("../config/database/MySqlConnect")
+const { mappingResultDataList } = require("../utils/ConvertThai")
 const { getMoment } = require("../utils/MomentUtil")
-const { ASCII2Unicode } = require("../utils/StringUtil")
+require("../utils/StringUtil")
 
 const getDataCupon = async () => {
   const date = new Date()
@@ -14,14 +15,7 @@ const getDataCupon = async () => {
       and ChkMember='N' 
       order by cutype,cucode`
   const results = await pool.query(sql)
-  const mappingResult = results.map((item, index) => {
-    return {
-      ...item,
-      CuName: ASCII2Unicode(item.CuName),
-      qty: 0
-    }
-  })
-  return mappingResult
+  return mappingResultDataList(results)
 }
 
 const saveData = async (payload, tableNo, macNo, cashier, netTotalAmount) => {
@@ -70,6 +64,31 @@ const saveDataCupon = async (payload) => {
   }
 }
 
+const addDataFromTemp = async (billNo, tableNo) => {
+  const sql = `select * from tempcupon where R_Table='${tableNo}'`;
+  const results = await pool.query(sql)
+  let moveTemp = false
+  
+  for (const tempCupon of results) {
+    const R_Index = billNo + "/" + tempCupon.CuCode
+
+    const sql = `INSERT INTO t_cupon
+      (R_Index, R_Refno, Terminal, Cashier, Time, CuCode, CuQuan, CuAmt, 
+      Refund, CuTextCode, CuTextComment, SMS_Code, 
+      B_UserEntertain, CuEntertainFlag, CuEntertainUser)
+      VALUES('${R_Index}', '${billNo}', '${tempCupon.Terminal}', 
+      '${tempCupon.Cashier}', '${tempCupon.Time}', '${tempCupon.CuCode}', ${tempCupon.CuQuan}, ${tempCupon.CuAmt}, 
+      '', '', '', '', 0, '', '');`
+    await pool.query(sql)
+    moveTemp = true
+  }
+
+  if(moveTemp === true){
+    // clear temp cupon
+    await pool.query(`delete from tempcupon where R_Table='${tableNo}'`)
+  }
+}
+
 const summaryCuponDiscountAmount = async (tableNo) => {
     const sql = `select sum(CuAmt) CuAmt from tempcupon where R_Table='${tableNo}'`;
     const results = await pool.query(sql)
@@ -83,5 +102,6 @@ const summaryCuponDiscountAmount = async (tableNo) => {
 module.exports = {
   getDataCupon,
   saveDataCupon,
-  summaryCuponDiscountAmount
+  summaryCuponDiscountAmount,
+  addDataFromTemp
 }

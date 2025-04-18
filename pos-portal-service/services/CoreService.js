@@ -1,4 +1,5 @@
 const pool = require("../config/database/MySqlConnect")
+const { mappingResultData, mappingResultDataList } = require("../utils/ConvertThai")
 
 const { PrefixZeroFormat, Unicode2ASCII } = require("../utils/StringUtil")
 
@@ -7,7 +8,7 @@ const getBalanceByRIndex = async (R_Index) => {
     where R_Index='${R_Index}' order by R_Table, R_Index`
   const results = await pool.query(sql)
   if (results.length > 0) {
-    return results[0]
+    return mappingResultData(results)
   }
   return null
 }
@@ -67,15 +68,15 @@ const getTableByCode = async (tableNo) => {
   const sql = `select * from tablefile where TCode='${tableNo}' limit 1`
   const results = await pool.query(sql)
   if (results.length > 0) {
-    return results[0]
+    return mappingResultData(results)
   }
   return null
 }
 
 const getBalanceByTable = async (tableNo) => {
-  const sql = `select * from balance  where R_Table='${tableNo}' and R_Void <> 'V' order by r_index`
+  const sql = `select * from balance where R_Table='${tableNo}' and R_Void <> 'V' order by r_index`
   const results = await pool.query(sql)
-  return results
+  return mappingResultDataList(results)
 }
 
 const getSummaryItem = async (tableNo) => {
@@ -91,7 +92,7 @@ const getPOSConfigSetup = async () => {
   const sql = `select * from posconfigsetup limit 1`
   const results = await pool.query(sql)
   if (results.length > 0) {
-    return results[0]
+    return mappingResultData(results)
   }
   return null
 }
@@ -212,7 +213,7 @@ const computeBalanceSummary = (
 
       // compute RNetTotal
       let RNetTotal = balance.R_Price * balance.R_Quan
-      let sumDiscountAll = balance.R_DiscBath + balance.R_PrSubAmt + balance.R_PrAmt
+      let sumDiscountAll = balance.R_DiscBath + balance.R_PrSubAmt + balance.R_PrAmt + balance.R_PrCuAmt
 
       if (balance.R_Service === "Y" && balance.R_Vat === "V") {
         let vatAmount = 0

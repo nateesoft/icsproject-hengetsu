@@ -1,9 +1,10 @@
-const pool = require('../config/database/MySqlConnect')
+const pool = require('../config/database/MySqlConnect');
+const { mappingResultDataList } = require('../utils/ConvertThai');
 
 const getAllOptionFile = async () => {
     const sql = `SELECT * FROM optionfile`;
     const results = await pool.query(sql)
-    return results
+    return mappingResultDataList(results)
 }
 
 const getOptionfileByProductCode = async (productCode) => {
@@ -11,7 +12,7 @@ const getOptionfileByProductCode = async (productCode) => {
       inner join optionfile o on p.PGroup = o.PGroup 
       where p.PCode = '${productCode}'`;
     const results = await pool.query(sql)
-    return results
+    return mappingResultDataList(results)
 }
 
 module.exports = {

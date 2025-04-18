@@ -5,7 +5,7 @@ const socket = io(process.env.SOCKETIO_SERVER, {
   autoConnect: true
 })
 const pool = require("../config/database/MySqlConnect")
-const { PrefixZeroFormat, Unicode2ASCII, ASCII2Unicode } = require("../utils/StringUtil")
+const { PrefixZeroFormat, Unicode2ASCII } = require("../utils/StringUtil")
 const { emptyTableBalance, getBalanceByTableNo } = require("./BalanceService")
 
 const {
@@ -32,13 +32,13 @@ const { getMoment } = require("../utils/MomentUtil")
 const { summaryBalance } = require("./CoreService")
 const { createListCredit, deleteListTempCredit } = require("./TCreditService")
 const { printReceiptHtml, printReviewReceiptHtml, printRefundBillHtml, printReceiptCopyHtml } = require('./SyncPrinterService')
+const { mappingResultDataList, mappingResultData } = require('../utils/ConvertThai')
+const { addDataFromTemp } = require('./CuponService')
 
 const getAllBillNoToday = async () => {
-  const sql = `select * from billno where B_OnDate='${getMoment().format(
-    "YYYY-MM-DD"
-  )}'`
+  const sql = `select * from billno where B_OnDate='${getMoment().format("YYYY-MM-DD")}'`
   const results = await pool.query(sql)
-  return results
+  return mappingResultDataList(results)
 }
 
 const searchBillNoCondition = async (billNo, postDate, macno) => {
@@ -53,32 +53,26 @@ const searchBillNoCondition = async (billNo, postDate, macno) => {
       ` where B_MacNo='${macno}' or B_Cashier='${macno}' order by B_PostDate`
   }
   const results = await pool.query(sql)
-  return results
+  return mappingResultDataList(results)
 }
 
 const getBillNoByTableNo = async (tableNo) => {
   const sql = `select * from billno where B_Table='${tableNo}'`
   const results = await pool.query(sql)
-  return results
+  return mappingResultDataList(results)
 }
 
 const getBillNoByRefno = async (billNo) => {
   const sql = `select * from billno where B_Refno='${billNo}'`
   const results = await pool.query(sql)
-  const mappingResult = results.map((item, index) => {
-      return { 
-          ...item, 
-          B_MemName: ASCII2Unicode(item.B_MemName)
-      }
-  })
-  return mappingResult[0]
+  return mappingResultData(results)
 }
 
 const getBillNoByRefnoExist = async (billNo) => {
   const sql = `select B_Refno from billno where B_Refno='${billNo}'`
   const results = await pool.query(sql)
   if (results.length > 0) {
-    return results[0]
+    return mappingResultData(results)
   }
   return null
 }
@@ -186,8 +180,7 @@ const updateRefundMTran = async (billNo, macno) => {
 }
 
 const updateRefundMTranPlu = async (billNo, macno) => {
-  const sql =
-    "delete from mtranplu where m_billno='" + macno + "/" + billNo + "'"
+  const sql = "delete from mtranplu where m_billno='" + macno + "/" + billNo + "'"
   const results = await pool.query(sql)
   return results
 }
@@ -301,8 +294,8 @@ const addNewBill = async (payload) => {
   const B_NetVat = netTotal - creditChargeAmount
   const B_NetNonVat = 0
   const B_Vat = vatAmount
-  const B_PayAmt = cashAmount + transferAmount
-  const B_Cash = cashAmount + transferAmount
+  const B_PayAmt = parseFloat(cashAmount) + transferAmount
+  const B_Cash = parseFloat(cashAmount) + transferAmount
   const B_GiftVoucher = 0
   // const B_Earnest = 0;
   const B_Ton = tonAmount
@@ -412,16 +405,16 @@ const addNewBill = async (payload) => {
     // save t_sale list
     await addDataFromBalance(B_Table, B_Refno, allBalance)
 
+    // move cupon temp
+    if(B_CuponDiscAmt>0){
+      await addDataFromTemp(B_Refno, B_Table)
+    }
+
     if (creditAmount > 0) {
       // update credit file
       await createListCredit(creditList, B_Refno, B_Cashier)
       await deleteListTempCredit(creditList, tableNo)
     }
-
-    // // update promotion
-    // await updateProSerTable(B_Table, allBalance);
-
-    // await ThermalPrinterConnect("192.168.1.209", "", B_Table)
 
     if (Object.keys(memberInfo).length > 0) {
       // update member memmaster

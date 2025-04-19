@@ -99,9 +99,19 @@ const summaryCuponDiscountAmount = async (tableNo) => {
     return 0.00
 }
 
+const getCuponByRefno = async (refno) => {
+    const sql = `select c.CuCode, c.CuName, tc.CuAmt 
+      from t_cupon tc left join cupon c on tc.CuCode = c.CuCode 
+      where tc.R_Refno ='${refno}'`;
+    const results = await pool.query(sql)
+
+    return mappingResultDataList(results)
+}
+
 module.exports = {
   getDataCupon,
   saveDataCupon,
   summaryCuponDiscountAmount,
-  addDataFromTemp
+  addDataFromTemp,
+  getCuponByRefno
 }

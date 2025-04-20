@@ -19,6 +19,21 @@ const getAllTSaleByRefno = async (refno) => {
     return mappingResultDataList(results)
 }
 
+const getAllTSaleByRefnoSummary = async (refno) => {
+    const sql = `select R_PluCode, R_Void, R_PName, 
+        sum(R_Quan) R_Quan, 
+        sum(R_Total) R_Total 
+        from t_sale ts 
+        where ts.R_Refno ='${refno}' 
+        and (R_LinkIndex ='' or R_LinkIndex is null or R_LinkIndex = 'null') 
+        and R_Void != 'V' 
+        group by R_PluCode, R_PName,R_Void 
+        order by R_PluCode`
+    const results = await pool.query(sql)
+
+    return mappingResultDataList(results)
+}
+
 const createNewTSale = async (balance, BillRefNo) => {
     const { R_Table, Macno, R_PluCode, R_PName, R_Unit, R_Group, R_Status, R_Normal,
         R_Discount, R_Service, R_Stock, R_Set, R_Vat, R_Type, R_ETD, R_Quan, R_Price, R_Total, R_PrType, R_PrCode, R_PrDisc,
@@ -280,5 +295,6 @@ module.exports = {
     processAllPSetReturn,
     getAllTSale,
     getAllTSaleByRefno,
-    processAllGroupSetReturn
+    processAllGroupSetReturn,
+    getAllTSaleByRefnoSummary
 }

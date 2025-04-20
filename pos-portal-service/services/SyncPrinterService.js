@@ -35,26 +35,12 @@ const truncateWord = (text, maxLength = 25) => {
   return result + "...";
 };
 
-const companyLogo = `com_logo.jpg`
+const companyLogo = process.env.PRINT_LOGO || `com_logo.jpg`
 const fontFamily = process.env.RECEIPT_FONT_FAMILY || `Angsana New`
 const Divider = `
 <div align="center">
   <font face="${fontFamily}" size="1">----------------------------------------------------------------------------------------------------</font>
 </div>`
-const footer = `
-    ${Divider}
-    <div align="center">
-      <font face="${fontFamily}" size="4"> (VAT INCLUDED)</font>
-    </div>
-    <div align="center">
-      <font face="${fontFamily}" size="4">E-mail GM@.com</font>
-    </div>
-    <div align="center">
-      <font face="${fontFamily}" size="4">Facebook Restaurant</font>
-    </div>
-    <div align="center">
-      <font face="${fontFamily}" size="4">มีอะไรก็ติดต่อมาได้ตลอด / Feedback</font>
-    </div>`
 
 const flagToSavePdf = "Y" === process.env.SAVE_PDF_PRINTER
 
@@ -66,6 +52,15 @@ const printReceiptHtml = async ({ macno, billInfo, tSaleInfo }) => {
 
   let headers = [poshwSetup.Heading1||"", poshwSetup.Heading2||"", poshwSetup.Heading3||"", poshwSetup.Heading4||""]
   headers = headers.filter(h => h !== "")
+  let footers = [poshwSetup.Footting1||"", poshwSetup.Footting2||"", poshwSetup.Footting3||""]
+  footers = footers.filter(h => h !== "")
+
+  let footerHtml = `${Divider}`
+  footers.forEach(item => {
+    footerHtml += `<div align="center">
+      <font face="${fontFamily}" size="4">${item}</font>
+    </div>`
+  })
 
   let header = `
     <div align="center">`;
@@ -104,10 +99,8 @@ const printReceiptHtml = async ({ macno, billInfo, tSaleInfo }) => {
         </tr>`
     let tipsItem = `<div align="center">`
     tSaleInfo.forEach(tSale => {
-      if(tSale.R_Void === 'V' || tSale.R_Total === 0 || tSale.R_PluCode=== 'TIPS') {
-        if (tSale.R_PluCode=== 'TIPS') {
-          tipsItem += `<font face="${fontFamily}" size="4">${truncateWord(tSale.R_PName)} ... ${formatNumber(tSale.R_Total)}</font>`
-        }
+      if(tSale.R_PluCode=== 'TIPS') {
+        tipsItem += `<font face="${fontFamily}" size="4">${truncateWord(tSale.R_PName)} ... ${formatNumber(tSale.R_Total)}</font>`
         return
       }
       billTable += `
@@ -127,7 +120,9 @@ const printReceiptHtml = async ({ macno, billInfo, tSaleInfo }) => {
     billTable += `</table></div>`
     tipsItem += `</div>`
 
-  const subTotalItems = tSaleInfo.filter(item => item.R_Void !== 'V').length
+  const subTotalItems = tSaleInfo.reduce((sum, item) => {
+    return (item.R_Void !== 'V') ? sum + item.R_Quan: sum
+  }, 0)
   
   let B_FastDiscAmt = ''
   if (billInfo.B_FastDiscAmt>0) {
@@ -346,6 +341,7 @@ const printReceiptHtml = async ({ macno, billInfo, tSaleInfo }) => {
   <div style="padding: 2px;">
       ${header}
       ${billTable}
+      ${Divider}
       <div align="center">
         <table width="100%" cellPadding="0" cellSpacing="0">
           <tr>
@@ -447,7 +443,7 @@ const printReceiptHtml = async ({ macno, billInfo, tSaleInfo }) => {
         </div>
       </div>
       ${MemberInfo}
-      ${footer}
+      ${footerHtml}
   </div>`
 
   if(flagToSavePdf){
@@ -479,6 +475,15 @@ const printReviewReceiptHtml = async ({ macno, tableInfo, balanceInfo }) => {
   const poshwSetup = await getDataByMacno(macno)
   let headers = [poshwSetup.Heading1||"", poshwSetup.Heading2||"", poshwSetup.Heading3||"", poshwSetup.Heading4||""]
   headers = headers.filter(h => h !== "")
+  let footers = [poshwSetup.Footting1||"", poshwSetup.Footting2||"", poshwSetup.Footting3||""]
+  footers = footers.filter(h => h !== "")
+
+  let footerHtml = `${Divider}`
+  footers.forEach(item => {
+    footerHtml += `<div align="center">
+      <font face="${fontFamily}" size="4">${item}</font>
+    </div>`
+  })
 
   const tipsTotalAmount = balanceInfo.reduce((sum, item) => {
     return (item.R_PluCode==='TIPS') ? sum + item.R_Total : sum
@@ -527,7 +532,7 @@ const printReviewReceiptHtml = async ({ macno, tableInfo, balanceInfo }) => {
         </tr>`
   
   balanceInfo && balanceInfo.forEach(balance => {
-    if (balance.R_Void === 'V' || balance.R_PluCode === 'TIPS' || balance.R_Total === 0) {
+    if (balance.R_Void === 'V' || balance.R_PluCode === 'TIPS') {
       return
     }
     billTable += `
@@ -545,12 +550,15 @@ const printReviewReceiptHtml = async ({ macno, tableInfo, balanceInfo }) => {
   })
   billTable += `</table></div>`
 
-  const subTotalItems = balanceInfo.filter(item => item.R_Void !== 'V').length
+  const subTotalItems = balanceInfo.reduce((sum, item) => {
+    return (item.R_Void !== 'V') ? sum + item.R_Quan: sum
+  }, 0)
 
   const htmlContent = `
   <div style="padding: 2px;">
     ${header}
     ${billTable}
+    ${Divider}
     <div align="center">
       <table width="100%">
         <tr>
@@ -633,7 +641,7 @@ const printReviewReceiptHtml = async ({ macno, tableInfo, balanceInfo }) => {
       <font face="${fontFamily}" size="4">Tips ……………${(tipsTotalAmount>0) ? formatNumber(tipsTotalAmount): ""}………………</font>
     </div>
   </div>
-  ${footer}
+  ${footerHtml}
   </div>`
 
   if(flagToSavePdf){
@@ -652,6 +660,15 @@ const printRefundBillHtml = async ({ macno, billInfo, tSaleInfo }) => {
 
   let headers = [poshwSetup.Heading1||"", poshwSetup.Heading2||"", poshwSetup.Heading3||"", poshwSetup.Heading4||""]
   headers = headers.filter(h => h !== "")
+  let footers = [poshwSetup.Footting1||"", poshwSetup.Footting2||"", poshwSetup.Footting3||""]
+  footers = footers.filter(h => h !== "")
+
+  let footerHtml = `${Divider}`
+  footers.forEach(item => {
+    footerHtml += `<div align="center">
+      <font face="${fontFamily}" size="4">${item}</font>
+    </div>`
+  })
 
   let header = `
     <div align="center">
@@ -718,8 +735,10 @@ const printRefundBillHtml = async ({ macno, billInfo, tSaleInfo }) => {
             <font face="${fontFamily}" size="4">Amount</font>
           </th>
         </tr>`
+      let tipsItem = `<div align="center">`
       tSaleInfo.forEach(tSale => {
-        if(tSale.R_Total === 0){
+        if(tSale.R_PluCode=== 'TIPS') {
+          tipsItem += `<font face="${fontFamily}" size="4">${truncateWord(tSale.R_PName)} ... ${formatNumber(tSale.R_Total)}</font>`
           return
         }
         billTable += `
@@ -736,6 +755,11 @@ const printRefundBillHtml = async ({ macno, billInfo, tSaleInfo }) => {
         </tr>`
       })
       billTable += `</table></div>`
+      tipsItem += `</div>`
+
+  const subTotalItems = tSaleInfo.reduce((sum, item) => {
+    return (item.R_Void !== 'V') ? sum + item.R_Quan: sum
+  }, 0)
 
   let B_FastDiscAmt = ''
   if (billInfo.B_FastDiscAmt > 0) {
@@ -955,11 +979,12 @@ const printRefundBillHtml = async ({ macno, billInfo, tSaleInfo }) => {
     <div style="padding: 2px;">
       ${header}
       ${billTable}
+      ${Divider}
       <div align="center">
         <table width="100%" cellPadding="0" cellSpacing="0">
           <tr>
             <td>
-              <font face="${fontFamily}" size="4">SubtotalL....(Item: ${tSaleInfo.length})</font>
+              <font face="${fontFamily}" size="4">Subtotal....(Item: ${subTotalItems})</font>
             </td>
             <td align="right">
               <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_Total)}</font>
@@ -997,6 +1022,7 @@ const printRefundBillHtml = async ({ macno, billInfo, tSaleInfo }) => {
         </table>
       </div>
       ${Divider}
+      ${tipsItem}
       <div align="center">
         <table width="100%" cellPadding="0" cellSpacing="0">
           <tr>
@@ -1054,7 +1080,7 @@ const printRefundBillHtml = async ({ macno, billInfo, tSaleInfo }) => {
           </table>
       </div>
       ${MemberInfo}
-    ${footer}
+      ${footerHtml}
   </div>`
 
   if(flagToSavePdf){

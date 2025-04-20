@@ -6,7 +6,7 @@ const socket = io(process.env.SOCKETIO_SERVER, {
 })
 const pool = require("../config/database/MySqlConnect")
 const { PrefixZeroFormat, Unicode2ASCII } = require("../utils/StringUtil")
-const { emptyTableBalance, getBalanceByTableNo } = require("./BalanceService")
+const { emptyTableBalance, getBalanceByTableNo, getBalanceByTableNoSummary } = require("./BalanceService")
 
 const {
   getTableByCode,
@@ -17,7 +17,8 @@ const {
   addDataFromBalance,
   getAllTSaleByRefno,
   processAllPIngredentReturnStock,
-  processAllPSet
+  processAllPSet,
+  getAllTSaleByRefnoSummary
 } = require("./TSaleService")
 
 const { getBranch } = require("./BranchService")
@@ -273,16 +274,28 @@ const addNewBill = async (payload) => {
   const B_ServiceAmt = serviceAmount
   const B_ItemDiscAmt = 0
   const B_FastDisc = ""
-  const B_FastDiscAmt = 0
+  const B_FastDiscAmt = allBalance.reduce((sum, item) => {
+    return (item.R_PrSubType === '-F') ? sum + item.R_PrSubAmt: sum
+  }, 0)
   const B_EmpDisc = ""
-  const B_EmpDiscAmt = 0
+  const B_EmpDiscAmt = allBalance.reduce((sum, item) => {
+    return (item.R_PrSubType === '-E') ? sum + item.R_PrSubAmt: sum
+  }, 0)
   const B_TrainDisc = ""
-  const B_TrainDiscAmt = 0
+  const B_TrainDiscAmt = allBalance.reduce((sum, item) => {
+    return (item.R_PrSubType === '-T') ? sum + item.R_PrSubAmt: sum
+  }, 0)
   const B_MemDisc = ""
-  const B_MemDiscAmt = 0
+  const B_MemDiscAmt = allBalance.reduce((sum, item) => {
+    return (item.R_PrSubType === '-M') ? sum + item.R_PrSubAmt: sum
+  }, 0)
   const B_SubDisc = ""
-  const B_SubDiscAmt = 0
-  const B_SubDiscBath = 0
+  const B_SubDiscAmt = allBalance.reduce((sum, item) => {
+    return (item.R_PrSubType === '-S') ? sum + item.R_PrSubAmt: sum
+  }, 0)
+  const B_SubDiscBath = allBalance.reduce((sum, item) => {
+    return (item.R_DiscBath > 0) ? sum + item.R_DiscBath: sum
+  }, 0)
   const B_ProDiscAmt = 0
   const B_SpaDiscAmt = 0
   const B_AdjAmt = 0
@@ -452,7 +465,7 @@ const addNewBill = async (payload) => {
     await updateTableAvailableStatus(B_Table)
 
     const billInfo = await getBillNoByRefno(B_Refno)
-    const tSaleInfo = await getAllTSaleByRefno(B_Refno)
+    const tSaleInfo = await getAllTSaleByRefnoSummary(B_Refno)
 
     // send to printer
     socket.emit(
@@ -564,7 +577,7 @@ const billRefundStockIn = async (billNo, Cashier, macno) => {
   await refundTSale(tSaleData, Cashier)
 
   const billInfo = await getBillNoByRefno(billNo)
-  const tSaleInfo = await getAllTSaleByRefno(billNo)
+  const tSaleInfo = await getAllTSaleByRefnoSummary(billNo)
 
   // send to printer
   socket.emit(
@@ -753,7 +766,7 @@ const updateStatusPrintChkBill = async (tableNo, macno) => {
   const results = await pool.query(sql)
 
   const tableInfo = await getTableByCode(tableNo)
-  const balanceInfo = await getBalanceByTableNo(tableNo)
+  const balanceInfo = await getBalanceByTableNoSummary(tableNo)
 
   // send to printer
   socket.emit(

@@ -91,6 +91,19 @@ const getBalanceByTableNo = async tableNo => {
     const results = await pool.query(sql)
     return mappingResultDataList(results)
 }
+const getBalanceByTableNoSummary = async tableNo => {
+    const sql = `select R_PluCode, R_PName, R_Void, 
+        sum(R_Quan) R_Quan, 
+        sum(R_Total) R_Total 
+        from balance b 
+        where b.R_Table ='T9' 
+        and (R_LinkIndex ='' or R_LinkIndex is null or R_LinkIndex = 'null') 
+        and R_Void != 'V' 
+        group by R_Void, R_PluCode, R_PName 
+        order by R_PluCode`;
+    const results = await pool.query(sql)
+    return mappingResultDataList(results)
+}
 
 const getBalanceGroupProduct = async tableNo => {
     const sql = `select R_ETD, R_PluCode, R_PName, 
@@ -603,5 +616,6 @@ module.exports = {
     getBalanceGroupProduct,
     voidListMenuBalanceAll,
     getSubProductByPluCode,
-    updateChangeTypeMenu
+    updateChangeTypeMenu,
+    getBalanceByTableNoSummary
 }

@@ -63,6 +63,7 @@ const printReceiptHtml = async ({ macno, billInfo, tSaleInfo }) => {
   })
 
   let header = `
+    <div align="center"><img src="file:${companyLogo}" width="100" height="100" /></div>
     <div align="center">`;
     headers.forEach(item => {
       header += `
@@ -71,7 +72,6 @@ const printReceiptHtml = async ({ macno, billInfo, tSaleInfo }) => {
         </div>`
     })
     header += `</div>
-    <div align="center"><img src="file:${companyLogo}" width="100" height="100"></div>
     <div align="center">
       <div>
         <font face="${fontFamily}" size="4">Receipt No: ${billInfo.B_Refno}</font>
@@ -490,6 +490,7 @@ const printReviewReceiptHtml = async ({ macno, tableInfo, balanceInfo }) => {
   }, 0)
 
   let header = `
+    <div align="center"><img src="file:${companyLogo}" width="100" height="100" /></div>
     <div align="center">
       <div>
         <font face="${fontFamily}" size="4">*** ( Order review, not an official receipt ) ***</font>
@@ -504,7 +505,6 @@ const printReviewReceiptHtml = async ({ macno, tableInfo, balanceInfo }) => {
       `
     })
     header += `</div>
-    <div align="center"><img src="file:${companyLogo}" width="100" height="100"></div>
     <div align="center">
       <div>
         <font face="${fontFamily}" size="4">Table: ${tableInfo.Tcode}</font>
@@ -671,6 +671,7 @@ const printRefundBillHtml = async ({ macno, billInfo, tSaleInfo }) => {
   })
 
   let header = `
+    <div align="center"><img src="file:${companyLogo}" width="100" height="100"></div>
     <div align="center">
       <div>
         <font face="${fontFamily}" size="4">*** (Receipt Refund) ***</font>
@@ -684,7 +685,6 @@ const printRefundBillHtml = async ({ macno, billInfo, tSaleInfo }) => {
         </div>`
     })
     header += `</div>
-    <div align="center"><img src="file:${companyLogo}" width="100" height="100"></div>
     <div align="center">
       <table width="100%" cellPadding="0" cellSpacing="0">
         <tr>

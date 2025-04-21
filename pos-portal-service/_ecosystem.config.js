@@ -32,7 +32,8 @@ module.exports = {
         BOOKING_API_SECRET: "cs_b518af0e51df821a40ecc7a51e573af621b0d2d3",
         SOCKETIO_SERVER: "http://127.0.0.1:8081",
         CUSTOMER_ORDER_HOST: "http://192.168.1.197:3334",
-        RECEIPT_FONT_FAMILY: "Angsana New"
+        RECEIPT_FONT_FAMILY: "Angsana New",
+        PRINT_LOGO: "com_logo.jpg"
       }
     },
     {
@@ -67,7 +68,8 @@ module.exports = {
         BOOKING_API_SECRET: "cs_b518af0e51df821a40ecc7a51e573af621b0d2d3",
         SOCKETIO_SERVER: "http://127.0.0.1:8082",
         CUSTOMER_ORDER_HOST: "http://192.168.1.197:3335",
-        RECEIPT_FONT_FAMILY: "Angsana New"
+        RECEIPT_FONT_FAMILY: "Angsana New",
+        PRINT_LOGO: "com_logo.jpg"
       }
     },
     {
@@ -102,7 +104,8 @@ module.exports = {
         BOOKING_API_SECRET: "cs_b518af0e51df821a40ecc7a51e573af621b0d2d3",
         SOCKETIO_SERVER: "http://127.0.0.1:8083",
         CUSTOMER_ORDER_HOST: "http://192.168.1.197:3336",
-        RECEIPT_FONT_FAMILY: "Angsana New"
+        RECEIPT_FONT_FAMILY: "Angsana New",
+        PRINT_LOGO: "com_logo.jpg"
       }
     }
   ]

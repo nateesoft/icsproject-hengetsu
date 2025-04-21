@@ -27,20 +27,22 @@ const getSubProductByPluCode = async ({ tableNo, rLinkIndex }) => {
 const voidListMenuBalanceAll = async ({ menu_code, void_message, Cachier, empCode, macno }) => {
     const allMenuInBalance = await getAllBalanceByMenuCode(menu_code)
     allMenuInBalance.forEach(async item => {
-        await voidMenuBalance({
-            R_Index: item.R_Index, 
-            Cachier, 
-            empCode, 
-            voidMsg: void_message, 
-            macno
-        })
+        if(item.R_Void !== 'V'){
+            await voidMenuBalance({
+                R_Index: item.R_Index, 
+                Cachier, 
+                empCode, 
+                voidMsg: void_message, 
+                macno
+            })
+        }
     })
 }
 
 const voidMenuBalance = async ({ R_Index, Cachier, empCode, voidMsg, macno }) => {
     // Update  Balance File For Void
     const balance = await getBalanceByRIndex(R_Index);
-    if (balance) {
+    if (balance && balance.R_Void !== 'V') {
         // process return stock
         await returnStockIn(balance.R_Index, balance, empCode, voidMsg, macno)
 
@@ -510,10 +512,13 @@ const inventoryStock = async ({ R_Stock, R_Table, R_PluCode, R_Quan, R_Total, Ca
         await processAllPIngredent(S_No, R_PluCode, R_Quan, Cashier)
 
         // ตัดสต็อกสินค้าที่เป็นชุด SET (PSET)
-        await processAllPSet(R_PluCode, R_Quan, Cashier)
+        await processAllPSet(S_No, R_PluCode, R_Quan, Cashier)
+
+        return S_No
+    } else {
+        return null
     }
 
-    return null
 }
 
 const inventoryReturnStock = async ({ R_Stock, R_Table, R_PluCode, R_Quan, R_Total, Cashier, R_Set, R_Index, empCode, voidMsg, macno }) => {

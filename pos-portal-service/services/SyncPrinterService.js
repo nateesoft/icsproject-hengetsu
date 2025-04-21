@@ -4,6 +4,7 @@ const { getPOSConfigSetup } = require("./CoreService");
 const { savePdfFile } = require("../utils/PdfUtil");
 const { getCuponByRefno } = require("./CuponService");
 const { getTCreditList } = require("./TCreditService");
+const { getTGiftList } = require("./TGiftService");
 
 const formatNumber = (num) => {
   return new Intl.NumberFormat('th-TH', {
@@ -49,6 +50,7 @@ const printReceiptHtml = async ({ macno, billInfo, tSaleInfo }) => {
   const poshwSetup = await getDataByMacno(macno)
   const specialCupon = await getCuponByRefno(billInfo.B_Refno)
   const creditList = await getTCreditList(billInfo.B_Refno)
+  const giftVoucherList = await getTGiftList(billInfo.B_Refno)
 
   let headers = [poshwSetup.Heading1||"", poshwSetup.Heading2||"", poshwSetup.Heading3||"", poshwSetup.Heading4||""]
   headers = headers.filter(h => h !== "")
@@ -65,11 +67,18 @@ const printReceiptHtml = async ({ macno, billInfo, tSaleInfo }) => {
   let header = `
     <div align="center"><img src="file:${companyLogo}" width="100" height="100" /></div>
     <div align="center">`;
-    headers.forEach(item => {
-      header += `
-        <div>
-          <font face="${fontFamily}" size="4">${item}</font>
-        </div>`
+    headers.forEach((item, index) => {
+      if(index===0){
+        header += `
+          <div>
+            <b><font face="${fontFamily}" size="5">${item}</font></b>
+          </div>`
+      }else{
+        header += `
+          <div>
+            <font face="${fontFamily}" size="4">${item}</font>
+          </div>`
+      }
     })
     header += `</div>
     <div align="center">
@@ -124,6 +133,28 @@ const printReceiptHtml = async ({ macno, billInfo, tSaleInfo }) => {
     return (item.R_Void !== 'V') ? sum + item.R_Quan: sum
   }, 0)
   
+  let B_GiftVoucher = ''
+  if (billInfo.B_GiftVoucher>0) {
+    B_GiftVoucher = `<tr>
+      <td>
+        <font face="${fontFamily}" size="4">Gift Voucher</font>
+      </td>
+      <td align="right">
+        <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_GiftVoucher)}</font>
+      </td>
+    </tr>`
+    for(let key in giftVoucherList) {
+      const giftInfo = giftVoucherList[key]
+      B_GiftVoucher += `<tr>
+          <td>
+            <font face="${fontFamily}" size="4">... ${giftInfo.giftno}</font>
+          </td>
+          <td align="right">
+            <font face="${fontFamily}" size="4">${formatNumber(giftInfo.giftamt)}</font>
+          </td>
+        </tr>`
+    }
+  }
   let B_FastDiscAmt = ''
   if (billInfo.B_FastDiscAmt>0) {
     B_FastDiscAmt = `<tr>
@@ -294,7 +325,7 @@ const printReceiptHtml = async ({ macno, billInfo, tSaleInfo }) => {
       const creditInfo = creditList[key]
       B_CrAmt1 += `<tr>
           <td>
-            <font face="${fontFamily}" size="4"> ${creditInfo.CrCode}</font>
+            <font face="${fontFamily}" size="4">... ${creditInfo.CrCode}</font>
           </td>
           <td align="right">
             <font face="${fontFamily}" size="4">${formatNumber(creditInfo.CrAmt)}</font>
@@ -426,6 +457,7 @@ const printReceiptHtml = async ({ macno, billInfo, tSaleInfo }) => {
           <table width="100%" cellPadding="0" cellSpacing="0">
             ${B_Earnest}
             ${B_Entertain}
+            ${B_GiftVoucher}
             ${B_Cash}
             ${B_Ton}
             ${B_TransferAmt}
@@ -497,12 +529,19 @@ const printReviewReceiptHtml = async ({ macno, tableInfo, balanceInfo }) => {
       </div>
     </div>
     <div align="center">`
-    headers.forEach(item => {
-      header += `
-        <div>
-          <font face="${fontFamily}" size="4">${item}</font>
-        </div>
-      `
+    headers.forEach((item, index) => {
+      if(index===0){
+        header += `
+          <div>
+            <b><font face="${fontFamily}" size="5">${item}</font></b>
+          </div>`
+      }else{
+        header += `
+          <div>
+            <font face="${fontFamily}" size="4">${item}</font>
+          </div>
+        `
+      }
     })
     header += `</div>
     <div align="center">
@@ -657,6 +696,7 @@ const printRefundBillHtml = async ({ macno, billInfo, tSaleInfo }) => {
   const poshwSetup = await getDataByMacno(macno)
   const specialCupon = await getCuponByRefno(billInfo.B_Refno)
   const creditList = await getTCreditList(billInfo.B_Refno)
+  const giftVoucherList = await getTGiftList(billInfo.B_Refno)
 
   let headers = [poshwSetup.Heading1||"", poshwSetup.Heading2||"", poshwSetup.Heading3||"", poshwSetup.Heading4||""]
   headers = headers.filter(h => h !== "")
@@ -678,11 +718,18 @@ const printRefundBillHtml = async ({ macno, billInfo, tSaleInfo }) => {
       </div>
     </div>
     <div align="center">`
-    headers.forEach(item => {
-      header += `
-        <div>
-          <font face="${fontFamily}" size="4">${item}</font>
-        </div>`
+    headers.forEach((item, index) => {
+      if(index===0){
+        header += `
+          <div>
+            <b><font face="${fontFamily}" size="5">${item}</font></b>
+          </div>`
+      }else{
+        header += `
+          <div>
+            <font face="${fontFamily}" size="4">${item}</font>
+          </div>`
+      }
     })
     header += `</div>
     <div align="center">
@@ -761,6 +808,28 @@ const printRefundBillHtml = async ({ macno, billInfo, tSaleInfo }) => {
     return (item.R_Void !== 'V') ? sum + item.R_Quan: sum
   }, 0)
 
+  let B_GiftVoucher = ''
+  if (billInfo.B_GiftVoucher>0) {
+    B_GiftVoucher = `<tr>
+      <td>
+        <font face="${fontFamily}" size="4">Gift Voucher</font>
+      </td>
+      <td align="right">
+        <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_GiftVoucher)}</font>
+      </td>
+    </tr>`
+    for(let key in giftVoucherList) {
+      const giftInfo = giftVoucherList[key]
+      B_GiftVoucher += `<tr>
+          <td>
+            <font face="${fontFamily}" size="4">... ${giftInfo.giftno}</font>
+          </td>
+          <td align="right">
+            <font face="${fontFamily}" size="4">${formatNumber(giftInfo.giftamt)}</font>
+          </td>
+        </tr>`
+    }
+  }
   let B_FastDiscAmt = ''
   if (billInfo.B_FastDiscAmt > 0) {
     B_FastDiscAmt = `<tr>
@@ -932,7 +1001,7 @@ const printRefundBillHtml = async ({ macno, billInfo, tSaleInfo }) => {
       const creditInfo = creditList[key]
       B_CrAmt1 += `<tr>
           <td>
-            <font face="${fontFamily}" size="4"> ${creditInfo.CrCode}</font>
+            <font face="${fontFamily}" size="4">... ${creditInfo.CrCode}</font>
           </td>
           <td align="right">
             <font face="${fontFamily}" size="4">${formatNumber(creditInfo.CrAmt)}</font>
@@ -1064,6 +1133,7 @@ const printRefundBillHtml = async ({ macno, billInfo, tSaleInfo }) => {
           <table width="100%" cellPadding="0" cellSpacing="0">
             ${B_Earnest}
             ${B_Entertain}
+            ${B_GiftVoucher}
             ${B_Cash}
             ${B_Ton}
             ${B_TransferAmt}

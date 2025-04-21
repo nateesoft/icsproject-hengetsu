@@ -35,6 +35,7 @@ const { createListCredit, deleteListTempCredit } = require("./TCreditService")
 const { printReceiptHtml, printReviewReceiptHtml, printRefundBillHtml, printReceiptCopyHtml } = require('./SyncPrinterService')
 const { mappingResultDataList, mappingResultData } = require('../utils/ConvertThai')
 const { addDataFromTemp } = require('./CuponService')
+const { getTempGiftList, deleteTempGiftAll, createListGiftFromTemp } = require('./TGiftService')
 
 const getAllBillNoToday = async () => {
   const sql = `select * from billno where B_OnDate='${getMoment().format("YYYY-MM-DD")}'`
@@ -211,6 +212,7 @@ const addNewBill = async (payload) => {
     memberInfo,
     cashInfo,
     creditInfo,
+    giftVoucherAmt,
     transferInfo,
     discountInfo,
     serviceInfo,
@@ -309,7 +311,7 @@ const addNewBill = async (payload) => {
   const B_Vat = vatAmount
   const B_PayAmt = parseFloat(cashAmount) + transferAmount
   const B_Cash = parseFloat(cashAmount) + transferAmount
-  const B_GiftVoucher = 0
+  const B_GiftVoucher = giftVoucherAmt
   // const B_Earnest = 0;
   const B_Ton = tonAmount
   const B_CrCode1 = crCode
@@ -427,6 +429,13 @@ const addNewBill = async (payload) => {
       // update credit file
       await createListCredit(creditList, B_Refno, B_Cashier)
       await deleteListTempCredit(creditList, tableNo)
+    }
+
+    if (giftVoucherAmt > 0) {
+      // update tempgift
+      const resultTempGift = await getTempGiftList(macno)
+      await createListGiftFromTemp(resultTempGift, B_Refno)
+      await deleteTempGiftAll(macno)
     }
 
     if (Object.keys(memberInfo).length > 0) {

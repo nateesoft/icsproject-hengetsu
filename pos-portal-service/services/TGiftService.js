@@ -14,6 +14,12 @@ const getTGiftList = async (refno) => {
     return mappingResultDataList(results)
 }
 
+const createListGiftFromTemp = async (giftTempList, B_Refno) => {
+    giftTempList.forEach(async payload => {
+        await createTGift({...payload, refno: B_Refno})
+    })
+}
+
 const createTempGift = async (payload) => {
     const { MacNo='', giftbarcode='', gifttype='', giftprice='', 
         giftmodel='', giftlot='', giftexp='', giftcode='', 
@@ -62,5 +68,6 @@ module.exports = {
     createTempGift,
     createTGift,
     deleteTempGiftAll,
-    deleteTempGiftByGiftNo
+    deleteTempGiftByGiftNo,
+    createListGiftFromTemp
 }

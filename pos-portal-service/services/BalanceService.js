@@ -485,8 +485,9 @@ const updateBalanceDetail = async payload => {
 
 const inventoryStock = async ({ R_Stock, R_Table, R_PluCode, R_Quan, R_Total, Cashier, R_Set, R_Index }) => {
     // update stock and process stockcard and stkfile
+    const S_No = R_Table + "-" + getMoment().format('HH:mm:ss')
+    
     if (R_Stock === 'Y') {
-        const S_No = R_Table + "-" + getMoment().format('HH:mm:ss')
         const S_SubNo = ""
         const S_Que = 0
         const S_PCode = R_PluCode
@@ -507,17 +508,15 @@ const inventoryStock = async ({ R_Stock, R_Table, R_PluCode, R_Quan, R_Total, Ca
         await ProcessStockOut(S_No, S_SubNo, S_Que, S_PCode, S_In, S_Out,
             S_InCost, S_OutCost, S_ACost, S_Rem, S_User, S_Link,
             PStock, PSet, r_index, SaleOrRefund)
-
-        // ตัดสต็อกสินค้าที่มี Ingredent
-        await processAllPIngredent(S_No, R_PluCode, R_Quan, Cashier)
-
-        // ตัดสต็อกสินค้าที่เป็นชุด SET (PSET)
-        await processAllPSet(S_No, R_PluCode, R_Quan, Cashier)
-
-        return S_No
-    } else {
-        return null
     }
+
+    // ตัดสต็อกสินค้าที่มี Ingredent
+    await processAllPIngredent(S_No, R_PluCode, R_Quan, Cashier)
+
+    // ตัดสต็อกสินค้าที่เป็นชุด SET (PSET)
+    await processAllPSet(S_No, R_PluCode, R_Quan, Cashier)
+
+    return S_No
 
 }
 

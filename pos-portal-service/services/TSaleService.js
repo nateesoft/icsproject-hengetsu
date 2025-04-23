@@ -1,7 +1,7 @@
 const pool = require('../config/database/MySqlConnect');
 const { mappingResultDataList } = require('../utils/ConvertThai');
 const { getMoment } = require('../utils/MomentUtil');
-const { Unicode2ASCII, ASCII2Unicode } = require('../utils/StringUtil');
+const { Unicode2ASCII } = require('../utils/StringUtil');
 const { listIngredeint, getPSetByPCode, getPCategoryByRLinkIndex } = require('./ProductService');
 const { ProcessStockOut } = require('./STCardService');
 
@@ -182,50 +182,65 @@ const processAllPIngredentReturnStock = async (S_No, PCode, R_Quan, Cashier) => 
 const processAllPSet = async (S_No, PCode, R_Quan, Cashier) => {
     let listPset = await getPSetByPCode(PCode);
     listPset && listPset.forEach(async psetBean => {
-        const S_SubNo = ""
-        const S_Que = 0
-        const S_PCode = psetBean.PSubCode
-        const S_In = 0
-        const S_Out = R_Quan * psetBean.PSubQty
-        const S_InCost = 0
-        const S_OutCost = 0
-        const S_ACost = 0
-        const S_Rem = "SAL"
-        const S_User = Cashier
-        const S_Link = ""
+        if('Y' === psetBean.PStock) {
+            const S_SubNo = ""
+            const S_Que = 0
+            const S_PCode = psetBean.PSubCode
+            const S_In = 0
+            const S_Out = R_Quan * psetBean.PSubQty
+            const S_InCost = 0
+            const S_OutCost = 0
+            const S_ACost = 0
+            const S_Rem = "SAL"
+            const S_User = Cashier
+            const S_Link = ""
+    
+            const PStock = psetBean.PStock || 'N'
+            const PSet = psetBean.PSet || 'N'
+            const r_index = ""
+            const SaleOrRefund = "SALE" // SALE or REFUND
+    
+            await ProcessStockOut(S_No, S_SubNo, S_Que, S_PCode, S_In, S_Out, S_InCost,
+                S_OutCost, S_ACost, S_Rem, S_User, S_Link, PStock, PSet, r_index, SaleOrRefund);
+        }
+        // ตัดสต็อกสินค้าที่มี Ingredent
+        await processAllPIngredent(S_No, psetBean.PSubCode, psetBean.PSubQty, Cashier)
 
-        const PStock = "N"
-        const PSet = "N"
-        const r_index = ""
-        const SaleOrRefund = "SALE" // SALE or REFUND
-
-        await ProcessStockOut(S_No, S_SubNo, S_Que, S_PCode, S_In, S_Out, S_InCost,
-            S_OutCost, S_ACost, S_Rem, S_User, S_Link, PStock, PSet, r_index, SaleOrRefund);
+        // ตัดสต็อกสินค้าที่เป็นชุด SET (PSET)
+        await processAllPSet(S_No, psetBean.PSubCode, psetBean.PSubQty, Cashier)
     })
 }
 
 const processAllPSetReturn = async (S_No, PCode, R_Quan, Cashier) => {
     let listPset = await getPSetByPCode(PCode);
     listPset.forEach(async psetBean => {
-        const S_SubNo = ""
-        const S_Que = 0
-        const S_PCode = psetBean.PSubCode
-        const S_In = R_Quan * psetBean.PSubQty
-        const S_Out = 0
-        const S_InCost = 0
-        const S_OutCost = 0
-        const S_ACost = 0
-        const S_Rem = "SAL"
-        const S_User = Cashier
-        const S_Link = ""
+        if('Y' === psetBean.PStock) {
+            const S_SubNo = ""
+            const S_Que = 0
+            const S_PCode = psetBean.PSubCode
+            const S_In = R_Quan * psetBean.PSubQty
+            const S_Out = 0
+            const S_InCost = 0
+            const S_OutCost = 0
+            const S_ACost = 0
+            const S_Rem = "SAL"
+            const S_User = Cashier
+            const S_Link = ""
+    
+            const PStock = psetBean.PStock
+            const PSet = psetBean.PSet || 'N'
+            const r_index = ""
+            const SaleOrRefund = "VOID" // SALE or REFUND
+    
+            await ProcessStockOut(S_No, S_SubNo, S_Que, S_PCode, S_In, S_Out, S_InCost,
+                S_OutCost, S_ACost, S_Rem, S_User, S_Link, PStock, PSet, r_index, SaleOrRefund);
+        }
 
-        const PStock = "N"
-        const PSet = "N"
-        const r_index = ""
-        const SaleOrRefund = "VOID" // SALE or REFUND
+        // ตัดสต็อกสินค้าที่มี Ingredent
+        await processAllPIngredentReturnStock(S_No, psetBean.PSubCode, psetBean.PSubQty, Cashier)
 
-        await ProcessStockOut(S_No, S_SubNo, S_Que, S_PCode, S_In, S_Out, S_InCost,
-            S_OutCost, S_ACost, S_Rem, S_User, S_Link, PStock, PSet, r_index, SaleOrRefund);
+        // ตัดสต็อกสินค้าที่เป็นชุด SET (PSET)
+        await processAllPSetReturn(S_No, psetBean.PSubCode, psetBean.PSubQty, Cashier)
     })
 }
 

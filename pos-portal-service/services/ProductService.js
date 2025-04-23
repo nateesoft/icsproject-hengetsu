@@ -32,7 +32,9 @@ const listIngredeint = async (pluCode) => {
 }
 
 const getPSetByPCode = async (pluCode) => {
-    const sql = `select * from pset where pcode='${pluCode}'`;
+    const sql = `select ps.*, p.PStock, p.PSet from pset ps 
+        inner join product p on ps.PCode =p.PCode 
+        where ps.pcode='${pluCode}'`;
     const results = await pool.query(sql)
 
     return mappingResultDataList(results)

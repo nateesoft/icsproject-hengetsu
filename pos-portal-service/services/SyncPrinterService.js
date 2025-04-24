@@ -38,6 +38,8 @@ const truncateWord = (text, maxLength = 25) => {
 
 const companyLogo = process.env.PRINT_LOGO || `com_logo.jpg`
 const fontFamily = process.env.RECEIPT_FONT_FAMILY || `Angsana New`
+const fontSize = process.env.FONT_SIZE || `4`
+
 const Divider = `
 <div align="center">
   <font face="${fontFamily}" size="1">----------------------------------------------------------------------------------------------------</font>
@@ -67,7 +69,7 @@ const printReceiptHtml = async ({ macno, billInfo, tSaleInfo }) => {
   let header = `
     <div align="center"><img src="file:${companyLogo}" width="100" height="100" /></div>
     <div align="center">`;
-    headers.forEach((item, index) => {
+    for (const [index, item] of headers.entries()) {
       if(index===0){
         header += `
           <div>
@@ -79,7 +81,7 @@ const printReceiptHtml = async ({ macno, billInfo, tSaleInfo }) => {
             <font face="${fontFamily}" size="4">${item}</font>
           </div>`
       }
-    })
+    }
     header += `</div>
     <div align="center">
       <div>
@@ -368,6 +370,40 @@ const printReceiptHtml = async ({ macno, billInfo, tSaleInfo }) => {
     </div>`
   }
 
+  let B_NetFood = ''
+  if(billInfo.B_NetFood>0){
+    B_NetFood += `<tr>
+            <td>
+              <font face="${fontFamily}" size="4">Food</font>
+            </td>
+            <td align="right">
+              <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_NetFood)}</font>
+            </td>
+          </tr>`
+  }
+  let B_NetDrink = ''
+  if(billInfo.B_NetDrink>0){
+    B_NetDrink += `<tr>
+            <td>
+              <font face="${fontFamily}" size="4">Drink</font>
+            </td>
+            <td align="right">
+              <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_NetDrink)}</font>
+            </td>
+          </tr>`
+  }
+  let B_NetProduct = ''
+  if(billInfo.B_NetProduct>0){
+    B_NetProduct += `<tr>
+            <td>
+              <font face="${fontFamily}" size="4">Other</font>
+            </td>
+            <td align="right">
+              <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_NetProduct)}</font>
+            </td>
+          </tr>`
+  }
+
   let htmlContent = `
   <div style="padding: 2px;">
       ${header}
@@ -385,30 +421,9 @@ const printReceiptHtml = async ({ macno, billInfo, tSaleInfo }) => {
       ${Divider}
       <div align="center" style="margin-left: 10px;">
         <table width="100%" cellPadding="0" cellSpacing="0">
-          <tr>
-            <td>
-              <font face="${fontFamily}" size="4">Food</font>
-            </td>
-            <td align="right">
-              <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_NetFood)}</font>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <font face="${fontFamily}" size="4">Drink</font>
-            </td>
-            <td align="right">
-              <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_NetDrink)}</font>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <font face="${fontFamily}" size="4">Other</font>
-            </td>
-            <td align="right">
-              <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_NetProduct)}</font>
-            </td>
-          </tr>
+          ${B_NetFood}
+          ${B_NetDrink}
+          ${B_NetProduct}
         </table>
       </div>
       ${Divider}
@@ -558,7 +573,7 @@ const printReviewReceiptHtml = async ({ macno, tableInfo, balanceInfo }) => {
         <font face="${fontFamily}" size="4">*** ( Order review, not an official receipt ) ***</font>
     </div>
     <div align="center">`
-    headers.forEach((item, index) => {
+    for (const [index, item] of headers.entries()) {
       if(index===0){
         header += `
           <div>
@@ -571,7 +586,7 @@ const printReviewReceiptHtml = async ({ macno, tableInfo, balanceInfo }) => {
           </div>
         `
       }
-    })
+    }
     header += `</div>
     <div align="center">
       <div>
@@ -691,6 +706,15 @@ const printReviewReceiptHtml = async ({ macno, tableInfo, balanceInfo }) => {
     </tr>`
   }
 
+  let showDiscount = ''
+  if(totalDiscountAmount>0){
+    showDiscount += `<tr>
+          <td colspan="2">
+            <font face="${fontFamily}" size="4">Discount...</font>
+          </td>
+        </tr>`
+  }
+
   const htmlContent = `
   <div style="padding: 2px;">
     ${header}
@@ -801,11 +825,7 @@ const printReviewReceiptHtml = async ({ macno, tableInfo, balanceInfo }) => {
     </div>
     <div align="center">
       <table width="100%" cellPadding="0" cellSpacing="0">
-        <tr>
-          <td colspan="2">
-            <font face="${fontFamily}" size="4">[Payment Detail]</font>
-          </td>
-        </tr>
+        ${showDiscount}
         ${B_FastDiscAmt}
         ${B_EmpDiscAmt}
         ${B_MemDiscAmt}
@@ -853,7 +873,7 @@ const printRefundBillHtml = async ({ macno, billInfo, tSaleInfo }) => {
       </div>
     </div>
     <div align="center">`
-    headers.forEach((item, index) => {
+    for (const [index, item] of headers.entries()) {
       if(index===0){
         header += `
           <div>
@@ -865,7 +885,7 @@ const printRefundBillHtml = async ({ macno, billInfo, tSaleInfo }) => {
             <font face="${fontFamily}" size="4">${item}</font>
           </div>`
       }
-    })
+    }
     header += `</div>
     <div align="center">
       <table width="100%" cellPadding="0" cellSpacing="0">

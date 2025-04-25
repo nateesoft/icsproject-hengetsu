@@ -36,9 +36,8 @@ const truncateWord = (text, maxLength = 25) => {
   return result + "...";
 };
 
-const companyLogo = process.env.PRINT_LOGO || `com_logo.jpg`
-const fontFamily = process.env.RECEIPT_FONT_FAMILY || `Angsana New`
-const fontSize = process.env.FONT_SIZE || `4`
+const companyLogo = 'com_logo.jpg'
+const fontFamily = 'Angsana New'
 
 const Divider = `
 <div align="center">
@@ -60,14 +59,14 @@ const printReceiptHtml = async ({ macno, billInfo, tSaleInfo }) => {
   footers = footers.filter(h => h !== "")
 
   let footerHtml = `${Divider}`
-  footers.forEach(item => {
+  for (const [index, item] of footers.entries()) {
     footerHtml += `<div align="center">
       <font face="${fontFamily}" size="4">${item}</font>
     </div>`
-  })
+  }
 
   let header = `
-    <div align="center"><img src="file:${companyLogo}" width="100" height="100" /></div>
+    <div align="center"><img src="file:${companyLogo}" width="100" height="100"></div>
     <div align="center">`;
     for (const [index, item] of headers.entries()) {
       if(index===0){
@@ -109,7 +108,7 @@ const printReceiptHtml = async ({ macno, billInfo, tSaleInfo }) => {
           </th>
         </tr>`
     let tipsItem = `<div align="center">`
-    tSaleInfo.forEach(tSale => {
+    for (const [index, tSale] of tSaleInfo.entries()) {
       if(tSale.R_PluCode=== 'TIPS') {
         tipsItem += `<font face="${fontFamily}" size="4">${truncateWord(tSale.R_PName)} ... ${formatNumber(tSale.R_Total)}</font>`
         return
@@ -126,7 +125,7 @@ const printReceiptHtml = async ({ macno, billInfo, tSaleInfo }) => {
             <font face="${fontFamily}" size="4">${formatNumber(tSale.R_Total)}</font>
           </td>
         </tr>`
-    })
+    }
     
     billTable += `</table></div>`
     tipsItem += `</div>`
@@ -557,18 +556,18 @@ const printReviewReceiptHtml = async ({ macno, tableInfo, balanceInfo }) => {
   footers = footers.filter(h => h !== "")
 
   let footerHtml = `${Divider}`
-  footers.forEach(item => {
+  for (const [index, item] of footers.entries()) {
     footerHtml += `<div align="center">
       <font face="${fontFamily}" size="4">${item}</font>
     </div>`
-  })
+  }
 
   const tipsTotalAmount = balanceInfo.reduce((sum, item) => {
     return (item.R_PluCode==='TIPS') ? sum + item.R_Total : sum
   }, 0)
 
   let header = `
-    <div align="center"><img src="file:${companyLogo}" width="100" height="100" /></div>
+    <div align="center"><img src="file:${companyLogo}" width="100" height="100"></div>
     <div align="center">
         <font face="${fontFamily}" size="4">*** ( Order review, not an official receipt ) ***</font>
     </div>
@@ -614,7 +613,7 @@ const printReviewReceiptHtml = async ({ macno, tableInfo, balanceInfo }) => {
           </th>
         </tr>`
   
-  balanceInfo && balanceInfo.forEach(balance => {
+  for (const [index, balance] of balanceInfo.entries()) {
     if (balance.R_Void === 'V' || balance.R_PluCode === 'TIPS') {
       return
     }
@@ -630,7 +629,7 @@ const printReviewReceiptHtml = async ({ macno, tableInfo, balanceInfo }) => {
           <font face="${fontFamily}" size="4">${formatNumber(balance.R_Total)}</font>
         </td>
       </tr>`
-  })
+  }
   billTable += `</table></div>`
 
   const subTotalItems = balanceInfo.reduce((sum, item) => {
@@ -859,11 +858,11 @@ const printRefundBillHtml = async ({ macno, billInfo, tSaleInfo }) => {
   footers = footers.filter(h => h !== "")
 
   let footerHtml = `${Divider}`
-  footers.forEach(item => {
+  for (const [index, item] of footers.entries()) {
     footerHtml += `<div align="center">
       <font face="${fontFamily}" size="4">${item}</font>
     </div>`
-  })
+  }
 
   let header = `
     <div align="center"><img src="file:${companyLogo}" width="100" height="100"></div>
@@ -938,7 +937,7 @@ const printRefundBillHtml = async ({ macno, billInfo, tSaleInfo }) => {
           </th>
         </tr>`
       let tipsItem = `<div align="center">`
-      tSaleInfo.forEach(tSale => {
+      for (const [index, tSale] of tSaleInfo.entries()) {
         if(tSale.R_PluCode=== 'TIPS') {
           tipsItem += `<font face="${fontFamily}" size="4">${truncateWord(tSale.R_PName)} ... ${formatNumber(tSale.R_Total)}</font>`
           return
@@ -955,7 +954,7 @@ const printRefundBillHtml = async ({ macno, billInfo, tSaleInfo }) => {
             <font face="${fontFamily}" size="4">${formatNumber(tSale.R_Total)}</font>
           </td>
         </tr>`
-      })
+      }
       billTable += `</table></div>`
       tipsItem += `</div>`
 

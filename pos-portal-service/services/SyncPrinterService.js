@@ -1,3 +1,6 @@
+const path = require('path');
+const fs = require('fs');
+
 const { getDataByMacno } = require("./PosHwSetup")
 const { getMoment } = require('../utils/MomentUtil');
 const { getPOSConfigSetup } = require("./CoreService");
@@ -35,6 +38,18 @@ const truncateWord = (text, maxLength = 25) => {
   }
   return result + "...";
 };
+
+const publicPath = path.join(__dirname, '..', 'public', 'savePdf');
+const getSavePdfPath = (p) => {
+  const dayFolder = getMoment().format('YYYY-MM-DD')
+
+  // ตรวจสอบว่าโฟลเดอร์มีอยู่หรือไม่ ถ้าไม่ก็กำหนดให้สร้าง
+  if (!fs.existsSync(publicPath + "/" + dayFolder)) {
+    fs.mkdirSync(publicPath + "/" + dayFolder, { recursive: true });
+  }
+
+  return path.join(publicPath + "/" + dayFolder, p)
+}
 
 const companyLogo = 'com_logo.jpg'
 const fontFamily = 'Angsana New'
@@ -524,7 +539,7 @@ const printReceiptHtml = async ({ macno, billInfo, tSaleInfo }) => {
   </div>`
 
   if(flagToSavePdf){
-    const pdfFile = "/Users/tx091511/Documents/pdf/receipt_" + getMoment().format('YYYY-MM-DD')+".pdf"
+    const pdfFile = getSavePdfPath("receipt_" + getMoment().format('YYYY-MM-DD_HHmmss')+".pdf")
     await savePdfFile(htmlContent, pdfFile)
   }
 
@@ -541,7 +556,7 @@ const printReceiptCopyHtml = async ({ macno, billInfo, tSaleInfo }) => {
   `
 
   if(flagToSavePdf){
-    const pdfFile = "/Users/tx091511/Documents/pdf/receipt_copy_" + getMoment().format('YYYY-MM-DD')+".pdf"
+    const pdfFile = getSavePdfPath("receipt_copy_" + getMoment().format('YYYY-MM-DD_HHmmss')+".pdf")
     await savePdfFile(htmlContent, pdfFile)
   }
 
@@ -638,11 +653,15 @@ const printReviewReceiptHtml = async ({ macno, tableInfo, balanceInfo }) => {
 
   const totalDiscountAmount = tableInfo.FastDiscAmt + tableInfo.EmpDiscAmt + tableInfo.MemDiscAmt + tableInfo.TrainDiscAmt + tableInfo.SubDiscAmt + tableInfo.DiscBath
 
+  const getDiscountPercent = strSlash => {
+    return `(${tableInfo.FastDisc.split('/')[0]}%)`
+  }
+
   let B_FastDiscAmt = ''
   if (tableInfo.FastDiscAmt>0) {
     B_FastDiscAmt = `<tr>
       <td>
-        <font face="${fontFamily}" size="4">Festival Discount</font>
+        <font face="${fontFamily}" size="4">Festival Discount ${getDiscountPercent(tableInfo.FastDisc)}</font>
       </td>
       <td align="right">
         <font face="${fontFamily}" size="4">${formatNumber(tableInfo.FastDiscAmt)}</font>
@@ -653,7 +672,7 @@ const printReviewReceiptHtml = async ({ macno, tableInfo, balanceInfo }) => {
   if(tableInfo.EmpDiscAmt>0){
     B_EmpDiscAmt = `<tr>
       <td>
-        <font face="${fontFamily}" size="4">Staff Discount</font>
+        <font face="${fontFamily}" size="4">Staff Discount ${getDiscountPercent(tableInfo.EmpDisc)}</font>
       </td>
       <td align="right">
         <font face="${fontFamily}" size="4">${formatNumber(tableInfo.EmpDiscAmt)}</font>
@@ -664,7 +683,7 @@ const printReviewReceiptHtml = async ({ macno, tableInfo, balanceInfo }) => {
   if(tableInfo.MemDiscAmt>0){
     B_MemDiscAmt = `<tr>
       <td>
-        <font face="${fontFamily}" size="4">Member Discount</font>
+        <font face="${fontFamily}" size="4">Member Discount ${getDiscountPercent(tableInfo.MemDisc)}</font>
       </td>
       <td align="right">
         <font face="${fontFamily}" size="4">${formatNumber(tableInfo.MemDiscAmt)}</font>
@@ -675,7 +694,7 @@ const printReviewReceiptHtml = async ({ macno, tableInfo, balanceInfo }) => {
   if(tableInfo.TrainDiscAmt>0){
     B_TrainDiscAmt = `<tr>
       <td>
-        <font face="${fontFamily}" size="4">Trainee Discount</font>
+        <font face="${fontFamily}" size="4">Trainee Discount ${getDiscountPercent(tableInfo.TrainDisc)}</font>
       </td>
       <td align="right">
         <font face="${fontFamily}" size="4">${formatNumber(tableInfo.TrainDiscAmt)}</font>
@@ -686,7 +705,7 @@ const printReviewReceiptHtml = async ({ macno, tableInfo, balanceInfo }) => {
   if(tableInfo.SubDiscAmt>0){
     B_SubDiscAmt = `<tr>
       <td>
-        <font face="${fontFamily}" size="4">Cupon Discount</font>
+        <font face="${fontFamily}" size="4">Cupon Discount ${getDiscountPercent(tableInfo.SubDisc)}</font>
       </td>
       <td align="right">
         <font face="${fontFamily}" size="4">${formatNumber(tableInfo.B_SubDiscAmt)}</font>
@@ -714,6 +733,40 @@ const printReviewReceiptHtml = async ({ macno, tableInfo, balanceInfo }) => {
         </tr>`
   }
 
+  let Food = ''
+  if(tableInfo.Food>0){
+    Food += `<tr>
+            <td>
+              <font face="${fontFamily}" size="4">Food</font>
+            </td>
+            <td align="right">
+              <font face="${fontFamily}" size="4">${formatNumber(tableInfo.Food)}</font>
+            </td>
+          </tr>`
+  }
+  let Drink = ''
+  if(tableInfo.Drink>0){
+    Drink += `<tr>
+            <td>
+              <font face="${fontFamily}" size="4">Drink</font>
+            </td>
+            <td align="right">
+              <font face="${fontFamily}" size="4">${formatNumber(tableInfo.Drink)}</font>
+            </td>
+          </tr>`
+  }
+  let Product = ''
+  if(tableInfo.Product>0){
+    Product += `<tr>
+            <td>
+              <font face="${fontFamily}" size="4">Other</font>
+            </td>
+            <td align="right">
+              <font face="${fontFamily}" size="4">${formatNumber(tableInfo.Product)}</font>
+            </td>
+          </tr>`
+  }
+
   const htmlContent = `
   <div style="padding: 2px;">
     ${header}
@@ -734,30 +787,9 @@ const printReviewReceiptHtml = async ({ macno, tableInfo, balanceInfo }) => {
     ${Divider}
     <div style="margin-left: '10px'">
       <table width="100%" cellPadding="0" cellSpacing="0">
-        <tr>
-          <td>
-            <font face="${fontFamily}" size="4">Food</font>
-          </td>
-          <td align="right">
-            <font face="${fontFamily}" size="4">${formatNumber(tableInfo.Food)}</font>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <font face="${fontFamily}" size="4">Drink</font>
-          </td>
-          <td align="right">
-            <font face="${fontFamily}" size="4">${formatNumber(tableInfo.Drink)}</font>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <font face="${fontFamily}" size="4">Other</font>
-          </td>
-          <td align="right">
-            <font face="${fontFamily}" size="4">${formatNumber(tableInfo.Product)}</font>
-          </td>
-        </tr>
+        ${Food}
+        ${Drink}
+        ${Product}
       </table>
     </div>
     ${Divider}
@@ -838,7 +870,7 @@ const printReviewReceiptHtml = async ({ macno, tableInfo, balanceInfo }) => {
   </div>`
 
   if(flagToSavePdf){
-    const pdfFile = "/Users/tx091511/Documents/pdf/review_" + getMoment().format('YYYY-MM-DD')+".pdf"
+    const pdfFile = getSavePdfPath("review_" + getMoment().format('YYYY-MM-DD_HHmmss')+".pdf")
     await savePdfFile(htmlContent, pdfFile)
   }
 
@@ -1339,7 +1371,7 @@ const printRefundBillHtml = async ({ macno, billInfo, tSaleInfo }) => {
   </div>`
 
   if(flagToSavePdf){
-    const pdfFile = "/Users/tx091511/Documents/pdf/refund_receipt" + getMoment().format('YYYY-MM-DD')+".pdf"
+    const pdfFile = getSavePdfPath("refund_receipt" + getMoment().format('YYYY-MM-DD_HHmmss')+".pdf")
     await savePdfFile(htmlContent, pdfFile)
   }
 
@@ -1394,7 +1426,7 @@ const printPaidInOutHtml = async ({ branchName, cashier, paidInOutAmt, typeDesc,
   `
 
   if(flagToSavePdf){
-    const pdfFile = "/Users/tx091511/Documents/pdf/paidinout_" + getMoment().format('YYYY-MM-DD')+".pdf"
+    const pdfFile = getSavePdfPath("paidinout_" + getMoment().format('YYYY-MM-DD_HHmmss')+".pdf")
     await savePdfFile(htmlContent, pdfFile)
   }
 

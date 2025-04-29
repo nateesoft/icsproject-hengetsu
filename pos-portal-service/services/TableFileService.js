@@ -83,6 +83,17 @@ const updateTableDiscount = async (payload) => {
     PrCuCode = "", PrCuDisc="", PrCuBath=""
   } = payload
 
+  // clear discount all balance
+  const sqlClearBalance = `UPDATE balance 
+        SET R_PrDisc='0', R_PrBath='0', R_PrAmt='0',
+        R_DiscBath='0', R_PrCuQuan=R_Quan, R_PrCuAmt='0',
+        R_Redule='0', R_PrQuan=R_Quan, R_PrSubQuan=R_Quan,
+        R_PrSubDisc='0', R_PrSubBath='0', R_PrSubAmt='0',
+        R_PrSubAdj='0', R_PrCuDisc='0', R_PrCuBath='0',
+        R_PrCuAdj='0', R_QuanCanDisc=R_Quan 
+        WHERE R_Table='${tableFile.Tcode}' and R_LinkIndex = '' and R_Void != 'V'`
+  await pool.query(sqlClearBalance)
+
   // update all balance
   const totalItem = await getSummaryItem(tableFile.Tcode)
 
@@ -171,6 +182,8 @@ const updateTableDiscount = async (payload) => {
         SpaDiscAmt='${SpaDiscAmt}' 
         where Tcode='${tableFile.Tcode}'`
   await pool.query(sql)
+
+  await summaryBalance(tableFile.Tcode, tableFile.MacNo)
 
   const discountAmount = FastDiscAmt + EmpDiscAmt + MemDiscAmt + TrainDiscAmt + SubDiscAmt + 
   discBath + CuponDiscAmt + SpaDiscAmt

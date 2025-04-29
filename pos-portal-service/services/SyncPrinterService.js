@@ -779,7 +779,7 @@ const printReviewReceiptHtml = async ({ macno, tableInfo, balanceInfo }) => {
             <font face="${fontFamily}" size="4">Item: ${subTotalItems}</font>
           </td>
           <td align="right">
-            <font face="${fontFamily}" size="4">${formatNumber(tableInfo.NetTotal)}</font>
+            <font face="${fontFamily}" size="4"></font>
           </td>
         </tr>
       </table>
@@ -796,13 +796,13 @@ const printReviewReceiptHtml = async ({ macno, tableInfo, balanceInfo }) => {
     <div align="center">
       <table width="100%" cellPadding="0" cellSpacing="0">
         <tr>
-            <td align="right">
-                <font face="${fontFamily}" size="4">Subtotal:</font>
-            </td>
-            <td align="right">
-                <font face="${fontFamily}" size="4">${formatNumber(tableInfo.NetTotal)}</font>
-            </td>
-          </tr>
+          <td align="right">
+              <font face="${fontFamily}" size="4">Subtotal:</font>
+          </td>
+          <td align="right">
+              <font face="${fontFamily}" size="4">${formatNumber(tableInfo.TAmount)}</font>
+          </td>
+        </tr>
         <tr>
           <td>
             <font face="${fontFamily}" size="4">Service Charge(${parseInt(tableInfo.Service)}%)</font>
@@ -839,6 +839,14 @@ const printReviewReceiptHtml = async ({ macno, tableInfo, balanceInfo }) => {
           </td>
         </tr>
         <tr>
+          <td>
+            <font face="${fontFamily}" size="4">Deposit</font>
+          </td>
+          <td align="right">
+            <font face="${fontFamily}" size="4">${formatNumber(tableInfo.depositAmt || 0)}</font>
+          </td>
+        </tr>
+        <tr>
           <td colspan="2">${Divider}</td>
         </tr>
         <tr>
@@ -846,7 +854,7 @@ const printReviewReceiptHtml = async ({ macno, tableInfo, balanceInfo }) => {
             <font face="${fontFamily}" size="4">Total:</font>
           </td>
           <td align="right">
-            <font face="${fontFamily}" size="4">${formatNumber(tableInfo.NetTotal-totalDiscountAmount)}</font>
+            <font face="${fontFamily}" size="4">${formatNumber(tableInfo.NetTotal-tableInfo.depositAmt-totalDiscountAmount)}</font>
           </td>
         </tr>
       </table>

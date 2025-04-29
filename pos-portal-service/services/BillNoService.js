@@ -770,7 +770,7 @@ const loadBillnoToBalance = async (billRefNo, tableNo) => {
   }
 }
 
-const updateStatusPrintChkBill = async (tableNo, macno) => {
+const updateStatusPrintChkBill = async (tableNo, macno, depositAmt) => {
   const sql = `update tablefile set PrintChkBill='Y' where Tcode='${tableNo}'`
   const results = await pool.query(sql)
 
@@ -784,7 +784,7 @@ const updateStatusPrintChkBill = async (tableNo, macno) => {
       id: 1,
       printerType: "message",
       printerName: "cashier",
-      message: await printReviewReceiptHtml({ macno, tableInfo, balanceInfo }),
+      message: await printReviewReceiptHtml({ macno, tableInfo: {...tableInfo, depositAmt}, balanceInfo }),
       terminal: "",
       tableNo: "",
       billNo: "",

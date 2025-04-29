@@ -1,3 +1,3 @@
 @echo off
 
-git pull --all
+git reset --hard origin/main

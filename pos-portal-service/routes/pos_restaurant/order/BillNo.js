@@ -83,8 +83,8 @@ router.post('/toBalance', function (req, res) {
 });
 
 router.post('/printChkBill', function (req, res) {
-  const { tableNo, macno } = req.body
-  BillNoService.updateStatusPrintChkBill(tableNo, macno)
+  const { tableNo, macno, depositAmt } = req.body
+  BillNoService.updateStatusPrintChkBill(tableNo, macno, depositAmt)
     .then(rows => {
       res.status(200).json({ status: 2000, data: rows })
     })

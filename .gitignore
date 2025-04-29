@@ -12,3 +12,5 @@ pos-restaurant/server/ecosystem.config.js
 config.json
 cashier.properties
 socket_config.properties
+
+database_backup/*

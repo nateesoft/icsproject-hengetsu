@@ -98,7 +98,7 @@ const getBalanceByTableNoSummary = async tableNo => {
         sum(R_Quan) R_Quan, 
         sum(R_Total) R_Total 
         from balance b 
-        where b.R_Table ='T9' 
+        where b.R_Table ='${tableNo}' 
         and (R_LinkIndex ='' or R_LinkIndex is null or R_LinkIndex = 'null') 
         and R_Void != 'V' 
         group by R_Void, R_PluCode, R_PName 

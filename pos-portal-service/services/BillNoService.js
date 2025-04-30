@@ -275,23 +275,23 @@ const addNewBill = async (payload) => {
   const B_Service = posConfigSetup.P_Service
   const B_ServiceAmt = serviceAmount
   const B_ItemDiscAmt = 0
-  const B_FastDisc = ""
+  const B_FastDisc = posConfigSetup.P_FastDisc || ""
   const B_FastDiscAmt = allBalance.reduce((sum, item) => {
     return (item.R_PrSubType === '-F') ? sum + item.R_PrSubAmt: sum
   }, 0)
-  const B_EmpDisc = ""
+  const B_EmpDisc = posConfigSetup.P_EmpDisc || ""
   const B_EmpDiscAmt = allBalance.reduce((sum, item) => {
     return (item.R_PrSubType === '-E') ? sum + item.R_PrSubAmt: sum
   }, 0)
-  const B_TrainDisc = ""
+  const B_TrainDisc = posConfigSetup.P_TrainDisc || ""
   const B_TrainDiscAmt = allBalance.reduce((sum, item) => {
     return (item.R_PrSubType === '-T') ? sum + item.R_PrSubAmt: sum
   }, 0)
-  const B_MemDisc = ""
+  const B_MemDisc = posConfigSetup.P_MemDisc || ""
   const B_MemDiscAmt = allBalance.reduce((sum, item) => {
     return (item.R_PrSubType === '-M') ? sum + item.R_PrSubAmt: sum
   }, 0)
-  const B_SubDisc = ""
+  const B_SubDisc = posConfigSetup.P_SubDisc || ""
   const B_SubDiscAmt = allBalance.reduce((sum, item) => {
     return (item.R_PrSubType === '-S') ? sum + item.R_PrSubAmt: sum
   }, 0)

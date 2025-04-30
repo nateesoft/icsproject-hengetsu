@@ -3,6 +3,7 @@ messages-service/ecosystem.config.js
 
 pos-portal-service/node_modules
 pos-portal-service/ecosystem.config.js
+pos-portal-service/public/savePdf/*
 
 pos-restaurant/server/node_modules
 pos-restaurant/server/ecosystem.config.js

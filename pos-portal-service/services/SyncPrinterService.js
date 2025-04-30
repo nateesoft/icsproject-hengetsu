@@ -68,6 +68,10 @@ const printReceiptHtml = async ({ macno, billInfo, tSaleInfo }) => {
   const creditList = await getTCreditList(billInfo.B_Refno)
   const giftVoucherList = await getTGiftList(billInfo.B_Refno)
 
+  const getDiscountPercent = strSlash => {
+    return `(${strSlash.split('/')[0]}%)`
+  }
+
   let headers = [poshwSetup.Heading1||"", poshwSetup.Heading2||"", poshwSetup.Heading3||"", poshwSetup.Heading4||""]
   headers = headers.filter(h => h !== "")
   let footers = [poshwSetup.Footting1||"", poshwSetup.Footting2||"", poshwSetup.Footting3||""]
@@ -175,7 +179,7 @@ const printReceiptHtml = async ({ macno, billInfo, tSaleInfo }) => {
   if (billInfo.B_FastDiscAmt>0) {
     B_FastDiscAmt = `<tr>
       <td>
-        <font face="${fontFamily}" size="4">Festival Discount</font>
+        <font face="${fontFamily}" size="4">Festival Discount ${getDiscountPercent(billInfo.B_FastDisc)}</font>
       </td>
       <td align="right">
         <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_FastDiscAmt)}</font>
@@ -186,7 +190,7 @@ const printReceiptHtml = async ({ macno, billInfo, tSaleInfo }) => {
   if(billInfo.B_EmpDiscAmt>0){
     B_EmpDiscAmt = `<tr>
       <td>
-        <font face="${fontFamily}" size="4">Staff Discount</font>
+        <font face="${fontFamily}" size="4">Staff Discount ${getDiscountPercent(billInfo.B_EmpDisc)}</font>
       </td>
       <td align="right">
         <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_EmpDiscAmt)}</font>
@@ -197,7 +201,7 @@ const printReceiptHtml = async ({ macno, billInfo, tSaleInfo }) => {
   if(billInfo.B_MemDiscAmt>0){
     B_MemDiscAmt = `<tr>
       <td>
-        <font face="${fontFamily}" size="4">Member Discount</font>
+        <font face="${fontFamily}" size="4">Member Discount ${getDiscountPercent(billInfo.B_MemDisc)}</font>
       </td>
       <td align="right">
         <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_MemDiscAmt)}</font>
@@ -208,7 +212,7 @@ const printReceiptHtml = async ({ macno, billInfo, tSaleInfo }) => {
   if(billInfo.B_TrainDiscAmt>0){
     B_TrainDiscAmt = `<tr>
       <td>
-        <font face="${fontFamily}" size="4">Trainee Discount</font>
+        <font face="${fontFamily}" size="4">Trainee Discount ${getDiscountPercent(billInfo.B_TrainDisc)}</font>
       </td>
       <td align="right">
         <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_TrainDiscAmt)}</font>
@@ -219,7 +223,7 @@ const printReceiptHtml = async ({ macno, billInfo, tSaleInfo }) => {
   if(billInfo.B_SubDiscAmt>0){
     B_SubDiscAmt = `<tr>
       <td>
-        <font face="${fontFamily}" size="4">Cupon Discount</font>
+        <font face="${fontFamily}" size="4">Cupon Discount ${getDiscountPercent(billInfo.B_SubDisc)}</font>
       </td>
       <td align="right">
         <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_SubDiscAmt)}</font>
@@ -492,19 +496,6 @@ const printReceiptHtml = async ({ macno, billInfo, tSaleInfo }) => {
               <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_GiftVoucher)}</font>
             </td>
           </tr>
-          <tr>
-            <td colspan="2">
-              ${Divider}
-            </td>
-          </tr>
-          <tr>
-            <td align="right">
-              <font face="${fontFamily}" size="4">Grand Total:</font>
-            </td>
-            <td align="right">
-              <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_NetTotal-billInfo.B_GiftVoucher)}</font>
-            </td>
-          </tr>
         </table>
       </div>
       ${Divider}
@@ -531,6 +522,17 @@ const printReceiptHtml = async ({ macno, billInfo, tSaleInfo }) => {
             ${B_CuponDiscAmt}
             ${B_ProDiscAmt}
             ${B_ItemDiscAmt}
+            <tr>
+              <td colspan="2">${Divider}</td>
+            </tr>
+            <tr>
+              <td align="right">
+                <font face="${fontFamily}" size="4">Grand Total:</font>
+              </td>
+              <td align="right">
+                <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_NetTotal-billInfo.B_GiftVoucher)}</font>
+              </td>
+            </tr>
           </table>
         </div>
       </div>
@@ -654,7 +656,7 @@ const printReviewReceiptHtml = async ({ macno, tableInfo, balanceInfo }) => {
   const totalDiscountAmount = tableInfo.FastDiscAmt + tableInfo.EmpDiscAmt + tableInfo.MemDiscAmt + tableInfo.TrainDiscAmt + tableInfo.SubDiscAmt + tableInfo.DiscBath
 
   const getDiscountPercent = strSlash => {
-    return `(${tableInfo.FastDisc.split('/')[0]}%)`
+    return `(${strSlash.split('/')[0]}%)`
   }
 
   let B_FastDiscAmt = ''
@@ -854,7 +856,7 @@ const printReviewReceiptHtml = async ({ macno, tableInfo, balanceInfo }) => {
             <font face="${fontFamily}" size="4">Total:</font>
           </td>
           <td align="right">
-            <font face="${fontFamily}" size="4">${formatNumber(tableInfo.NetTotal-tableInfo.depositAmt-totalDiscountAmount)}</font>
+            <font face="${fontFamily}" size="4">${formatNumber(tableInfo.NetTotal-tableInfo.depositAmt)}</font>
           </td>
         </tr>
       </table>

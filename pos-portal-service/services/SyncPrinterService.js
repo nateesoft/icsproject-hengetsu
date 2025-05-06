@@ -119,6 +119,9 @@ const printReceiptHtml = async ({ macno, billInfo, tSaleInfo, printerInfo }) => 
     header += `</div>
     <div align="center">
       <div>
+        <font face="${fontFamily}" size="4">REG ID: ${poshwSetup.MacNo}</font> 
+      </div>
+      <div>
         <font face="${fontFamily}" size="4">Receipt No: ${billInfo.B_Refno}</font> 
         <font face="${fontFamily}" size="4">Table No: ${billInfo.B_Table}</font>
       </div>
@@ -147,20 +150,20 @@ const printReceiptHtml = async ({ macno, billInfo, tSaleInfo, printerInfo }) => 
     for (const [index, tSale] of tSaleInfo.entries()) {
       if(tSale.R_PluCode=== 'TIPS') {
         tipsItem += `<font face="${fontFamily}" size="4">${truncateWord(tSale.R_PName)} ... ${formatNumber(tSale.R_Total)}</font>`
-        return
+      }else{
+        billTable += `
+          <tr>
+            <td style="max-width: 100px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">
+              <font face="${fontFamily}" size="4">${truncateWord(tSale.R_PName)}</font>
+            </td>
+            <td align="right">
+              <font face="${fontFamily}" size="4">${tSale.R_Quan}</font>
+            </td>
+            <td align="right">
+              <font face="${fontFamily}" size="4">${formatNumber(tSale.R_Total)}</font>
+            </td>
+          </tr>`
       }
-      billTable += `
-        <tr>
-          <td style="max-width: 100px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">
-            <font face="${fontFamily}" size="4">${truncateWord(tSale.R_PName)}</font>
-          </td>
-          <td align="right">
-            <font face="${fontFamily}" size="4">${tSale.R_Quan}</font>
-          </td>
-          <td align="right">
-            <font face="${fontFamily}" size="4">${formatNumber(tSale.R_Total)}</font>
-          </td>
-        </tr>`
     }
     
     billTable += `</table></div>`
@@ -305,7 +308,7 @@ const printReceiptHtml = async ({ macno, billInfo, tSaleInfo, printerInfo }) => 
         <font face="${fontFamily}" size="4">Deposit</font>
       </td>
       <td align="right">
-        <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_Earnest)}</font>
+        <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_Earnest)} -</font>
       </td>
     </tr>
     `
@@ -495,7 +498,7 @@ const printReceiptHtml = async ({ macno, billInfo, tSaleInfo, printerInfo }) => 
               <font face="${fontFamily}" size="4">Service Charge(${parseInt(billInfo.B_Service)}%):</font>
             </td>
             <td align="right">
-              <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_ServiceAmt)}</font>
+              <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_ServiceAmt)} +</font>
             </td>
           </tr>
           <tr>
@@ -543,6 +546,14 @@ const printReceiptHtml = async ({ macno, billInfo, tSaleInfo, printerInfo }) => 
             </td>
             <td align="right">
               <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_NetTotal)}</font>
+            </td>
+          </tr>
+          <tr>
+            <td align="right">
+              <font face="${fontFamily}" size="4">Round:</font>
+            </td>
+            <td align="right">
+              <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_NetDiff)}</font>
             </td>
           </tr>
         </table>
@@ -664,23 +675,22 @@ const printReviewReceiptHtml = async ({ macno, tableInfo, balanceInfo, printerIn
             <font face="${fontFamily}" size="4">Amount</font>
           </th>
         </tr>`
-  
   for (const [index, balance] of balanceInfo.entries()) {
     if (balance.R_Void === 'V' || balance.R_PluCode === 'TIPS') {
-      return
+    }else{
+      billTable += `
+        <tr>
+          <td style="left">
+            <font face="${fontFamily}" size="4">${truncateWord(balance.R_PName)}</font>
+          </td>
+          <td align="right">
+            <font face="${fontFamily}" size="4">${balance.R_Quan}</font>
+          </td>
+          <td align="right">
+            <font face="${fontFamily}" size="4">${formatNumber(balance.R_Total)}</font>
+          </td>
+        </tr>`
     }
-    billTable += `
-      <tr>
-        <td style="left">
-          <font face="${fontFamily}" size="4">${truncateWord(balance.R_PName)}</font>
-        </td>
-        <td align="right">
-          <font face="${fontFamily}" size="4">${balance.R_Quan}</font>
-        </td>
-        <td align="right">
-          <font face="${fontFamily}" size="4">${formatNumber(balance.R_Total)}</font>
-        </td>
-      </tr>`
   }
   billTable += `</table></div>`
 
@@ -872,7 +882,7 @@ const printReviewReceiptHtml = async ({ macno, tableInfo, balanceInfo, printerIn
         <font face="${fontFamily}" size="4">Deposit</font>
       </td>
       <td align="right">
-        <font face="${fontFamily}" size="4">${formatNumber(tableInfo.DepositAmt || 0)}</font>
+        <font face="${fontFamily}" size="4">${formatNumber(tableInfo.DepositAmt)} -</font>
       </td>
     </tr>`
   }
@@ -965,7 +975,7 @@ const printReviewReceiptHtml = async ({ macno, tableInfo, balanceInfo, printerIn
             <font face="${fontFamily}" size="4">Service Charge(${parseInt(tableInfo.Service)}%):</font>
           </td>
           <td align="right">
-            <font face="${fontFamily}" size="4">${formatNumber(tableInfo.ServiceAmt)}</font>
+            <font face="${fontFamily}" size="4">${formatNumber(tableInfo.ServiceAmt)} +</font>
           </td>
         </tr>
         <tr>
@@ -1084,16 +1094,20 @@ const printRefundBillHtml = async ({ macno, billInfo, tSaleInfo, printerInfo }) 
     header += `<div align="center">
       <table width="100%" cellPadding="0" cellSpacing="0">
         <tr>
-          <td align="right">
-            <font face="${fontFamily}" size="4">Refer Receipt No.: ${billInfo.B_Refno}</font>
+          <td align="left">
+            <font face="${fontFamily}" size="4">Receipt No.: ${billInfo.B_Refno}</font>
           </td>
           <td align="right">
             <font face="${fontFamily}" size="4">Table No: ${billInfo.B_Table} ... </font>
-            <font face="${fontFamily}" size="4">REG ID: ${billInfo.B_MacNo}</font>
           </td>
         </tr>
         <tr>
-          <td align="right">
+          <td align="center" colspan="2">
+            <font face="${fontFamily}" size="4">REG ID: ${poshwSetup.MacNo}</font>
+          </td>
+        </tr>
+        <tr>
+          <td align="left">
             <font face="${fontFamily}" size="4">Staff Void: ${billInfo.B_VoidUser}</font>
           </td>
           <td align="right">
@@ -1277,7 +1291,7 @@ const printRefundBillHtml = async ({ macno, billInfo, tSaleInfo, printerInfo }) 
         <font face="${fontFamily}" size="4">Deposit</font>
       </td>
       <td align="right">
-        <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_Earnest)}</font>
+        <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_Earnest)} -</font>
       </td>
     </tr>`
   }
@@ -1466,7 +1480,7 @@ const printRefundBillHtml = async ({ macno, billInfo, tSaleInfo, printerInfo }) 
                 <font face="${fontFamily}" size="4">Service Charge(${parseInt(billInfo.B_Service)}%):</font>
             </td>
             <td align="right">
-                <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_ServiceAmt)}</font>
+                <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_ServiceAmt)} +</font>
             </td>
           </tr>
           <tr>
@@ -1514,6 +1528,14 @@ const printRefundBillHtml = async ({ macno, billInfo, tSaleInfo, printerInfo }) 
             </td>
             <td align="right">
                 <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_NetTotal)}</font>
+            </td>
+          </tr>
+          <tr>
+            <td align="right">
+              <font face="${fontFamily}" size="4">Round:</font>
+            </td>
+            <td align="right">
+              <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_NetDiff)}</font>
             </td>
           </tr>
         </table>

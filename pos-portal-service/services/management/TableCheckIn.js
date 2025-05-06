@@ -38,8 +38,8 @@ const updateInActiveTable = async (tableNo) => {
 }
 
 const createData = async (tableNo, payload) => {
-    const convCustName = Unicode2ASCII(payload.customer_name)
-    const convNationCountry = Unicode2ASCII(payload.nation_country)
+    const convCustName = payload.customer_name
+    const convNationCountry = payload.nation_country
     const { empCode, macno,
         customer_count, 
         thai_man_count, thai_woman_count, thai_kid_count, thai_old_count,
@@ -86,9 +86,9 @@ const updateData = async (tableNo, payload) => {
         } = payload
     const emp_code_last = empCode;
 
-    const convCustName = Unicode2ASCII(payload.customer_name)
-    const convNationCountry = Unicode2ASCII(payload.nation_country)
-    const convCustNote = Unicode2ASCII(payload.customer_note)
+    const convCustName = payload.customer_name
+    const convNationCountry = payload.nation_country
+    const convCustNote = payload.customer_note
 
     const sql = `UPDATE table_checkin 
                 SET emp_code_last='${emp_code_last}', 

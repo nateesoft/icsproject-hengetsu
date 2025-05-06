@@ -110,7 +110,7 @@ const printCopyBill = async (billNo, Cashier, macno, copy) => {
   await pool.query(sql)
 
   const billInfo = await getBillNoByRefno(billNo)
-  const tSaleInfo = await getAllTSaleByRefno(billNo)
+  const tSaleInfo = await getAllTSaleByRefnoSummary(billNo)
 
   const printerInfo = await getCashierPrinterName(macno)
 
@@ -212,6 +212,7 @@ const addNewBill = async (payload) => {
     tableNo,
     billType,
     tonAmount,
+    netDiff,
     netTotal,
     memberInfo,
     cashInfo,
@@ -367,7 +368,7 @@ const addNewBill = async (payload) => {
   // const B_Entertain = 0;
   const B_VoucherDiscAmt = 0
   const B_VoucherOver = 0
-  const B_NetDiff = 0
+  const B_NetDiff = netDiff || 0
   const B_SumSetDiscAmt = 0
   const B_DetailFood = 0
   const B_DetailDrink = 0

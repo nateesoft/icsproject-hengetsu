@@ -77,15 +77,19 @@ const updateTableAvailableStatus = async (tableNo) => {
 }
 
 const updateTableDiscount = async (payload) => {
+  const posConfigSetup = await getPOSConfigSetup()
+
   const {
     tableFile, 
-    FastDisc, FastDiscAmt=0, EmpDisc, EmpDiscAmt=0,
-    MemDisc, MemDiscAmt=0, TrainDisc, TrainDiscAmt=0, SubDisc, SubDiscAmt=0,
+    FastDisc=posConfigSetup.P_FastDisc, FastDiscAmt=0, 
+    EmpDisc=posConfigSetup.P_EmpDisc, EmpDiscAmt=0,
+    MemDisc=posConfigSetup.P_MemDisc, MemDiscAmt=0, 
+    TrainDisc=posConfigSetup.P_TrainDisc, TrainDiscAmt=0, 
+    SubDisc=posConfigSetup.P_SubDisc, SubDiscAmt=0,
     DiscBath=0, CuponDiscAmt=0, SpaDiscAmt=0, 
     PrCuCode = "", PrCuDisc="", PrCuBath=""
   } = payload
 
-  const posConfigSetup = await getPOSConfigSetup()
 
   let fastDisc = FastDiscAmt > 0 ? FastDisc : posConfigSetup.P_FastDisc
   let empDisc = EmpDiscAmt > 0 ? EmpDisc : posConfigSetup.P_EmpDisc

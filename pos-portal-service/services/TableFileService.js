@@ -1,11 +1,12 @@
 const pool = require("../config/database/MySqlConnect")
-const { getMoment } = require("../utils/MomentUtil")
+const { getMoment, getCurrentTime } = require("../utils/MomentUtil")
 const { updateInActiveTable } = require("../services/management/TableCheckIn")
 const {
   getBalanceMaxIndex,
   updateBalanceMove,
   updateBalanceSplitBill,
-  summaryBalance
+  summaryBalance,
+  getPOSConfigSetup
 } = require("./CoreService")
 const { Unicode2ASCII } = require("../utils/StringUtil")
 const { mappingResultDataList, mappingResultData } = require("../utils/ConvertThai")
@@ -51,22 +52,23 @@ const getCheckTableStatus = async () => {
 
 const updateTableAvailableStatus = async (tableNo) => {
   const sql = `update tablefile 
-                set TOnact='N', 
-                TItem=0,TAmount=0,TCustomer=0, Cashier=null,
-                Service=0,ServiceAmt=0,
-                EmpDisc='',EmpDiscAmt=0,
-                FastDisc='',FastDiscAmt=0,
-                TrainDisc='',TrainDiscAmt=0,
-                MemDisc='',MemDiscAmt=0,
-                SubDisc='',SubDiscAmt=0,
-                DiscBath=0,ProDiscAmt=0,SpaDiscAmt=0,CuponDiscAmt=0,
-                ItemDiscAmt=0,MemCode='',MemCurAmt=0,MemName='',
-                Food=0,Drink=0,Product=0,NetTotal=0,PrintTotal=0,
-                PrintChkBill='N', PrintCnt=0, PrintTime1='', PrintTime2='',
-                ChkBill='N', StkCode1='', StkCode2='',TDesk=0,TUser='',VoidMsg='',
-                TPause='Y',TTableIsOn='Y',TActive='',TAutoClose='',
-                VatAmt=0,Vat=0,MemBegin=null,MemEnd=null,TCurTime='' 
-                where Tcode='${tableNo}'`
+      set TOnact='N', 
+      TItem=0,TAmount=0,TCustomer=0, Cashier=null,
+      Service=0,ServiceAmt=0,
+      EmpDisc='',EmpDiscAmt=0,
+      FastDisc='',FastDiscAmt=0,
+      TrainDisc='',TrainDiscAmt=0,
+      MemDisc='',MemDiscAmt=0,
+      SubDisc='',SubDiscAmt=0,
+      DiscBath=0,ProDiscAmt=0,SpaDiscAmt=0,CuponDiscAmt=0,
+      ItemDiscAmt=0,MemCode='',MemCurAmt=0,MemName='',
+      Food=0,Drink=0,Product=0,NetTotal=0,PrintTotal=0,
+      PrintChkBill='N', PrintCnt=0, PrintTime1='', PrintTime2='',
+      ChkBill='N', StkCode1='', StkCode2='',TDesk=0,TUser='',VoidMsg='',
+      TPause='Y',TTableIsOn='Y',TActive='',TAutoClose='',
+      VatAmt=0,Vat=0,MemBegin=null,MemEnd=null,TCurTime='',
+      DepositAmt=0,SubTotal_Amt=0,GiftVoucher_Amt=0 
+      where Tcode='${tableNo}'`
   const results = await pool.query(sql)
 
   // update table_checkin
@@ -83,7 +85,26 @@ const updateTableDiscount = async (payload) => {
     PrCuCode = "", PrCuDisc="", PrCuBath=""
   } = payload
 
+  const posConfigSetup = await getPOSConfigSetup()
+
+  let fastDisc = FastDiscAmt > 0 ? FastDisc : posConfigSetup.P_FastDisc
+  let empDisc = EmpDiscAmt > 0 ? EmpDisc : posConfigSetup.P_EmpDisc
+  let memDisc = MemDiscAmt > 0 ? MemDisc : posConfigSetup.P_MemDisc
+  let trainDisc = TrainDiscAmt > 0 ? TrainDisc : posConfigSetup.P_TrainDisc
+  let subDisc = SubDiscAmt > 0 ? SubDisc : posConfigSetup.P_SubDisc
+
+  // clear tempcupon
+  if(CuponDiscAmt === 0){
+    const sqlClearTempCupon = `delete from tempcupon where R_Table='${tableFile.Tcode}'`
+    await pool.query(sqlClearTempCupon)
+  }
+
   // clear discount all balance
+  const sqlClearDiscounTable = `UPDATE tablefile set 
+    EmpDisc='',FastDisc='',TrainDisc='',MemDisc='',SubDisc='' 
+    where Tcode='${tableFile.Tcode}'`
+  await pool.query(sqlClearDiscounTable)
+
   const sqlClearBalance = `UPDATE balance 
         SET R_PrDisc='0', R_PrBath='0', R_PrAmt='0',
         R_DiscBath='0', R_PrCuQuan=R_Quan, R_PrCuAmt='0',
@@ -173,11 +194,11 @@ const updateTableDiscount = async (payload) => {
   }
 
   const sql = `update tablefile set 
-        FastDisc='${FastDisc}',FastDiscAmt='${FastDiscAmt}',
-        EmpDisc='${EmpDisc}',EmpDiscAmt='${EmpDiscAmt}',
-        MemDisc='${MemDisc}',MemDiscAmt='${MemDiscAmt}',
-        TrainDisc='${TrainDisc}',TrainDiscAmt='${TrainDiscAmt}',
-        SubDisc='${SubDisc}',SubDiscAmt='${SubDiscAmt}',
+        FastDisc='${fastDisc}',FastDiscAmt='${FastDiscAmt}',
+        EmpDisc='${empDisc}',EmpDiscAmt='${EmpDiscAmt}',
+        MemDisc='${memDisc}',MemDiscAmt='${MemDiscAmt}',
+        TrainDisc='${trainDisc}',TrainDiscAmt='${TrainDiscAmt}',
+        SubDisc='${subDisc}',SubDiscAmt='${SubDiscAmt}',
         DiscBath='${discBath}',CuponDiscAmt='${CuponDiscAmt}',
         SpaDiscAmt='${SpaDiscAmt}' 
         where Tcode='${tableFile.Tcode}'`
@@ -301,7 +322,7 @@ const updateTableFile = async (tablefile) => {
 
   const sql = `UPDATE tablefile 
         SET Tcode='${Tcode}',SoneCode='${SoneCode}',MacNo='${MacNo}',Cashier='${Cashier}',
-            TCurTime=curtime(),TCustomer='${TCustomer}',TItem='${TItem}',TAmount='${TAmount}',
+            TCurTime='${getCurrentTime()}',TCustomer='${TCustomer}',TItem='${TItem}',TAmount='${TAmount}',
             TOnAct='${TOnAct}',
             Service='${Service}',
             ServiceAmt='${ServiceAmt}',

@@ -16,6 +16,10 @@ const getMomentTime = (dateStr) => {
     }
 }
 
+const getCurrentTime = () => {
+    return moment().utc(true).format('HH:mm:ss')
+}
+
 const getYesterday = () => {
     return moment().add(-1, 'day').utc(true)
 }
@@ -23,5 +27,6 @@ const getYesterday = () => {
 module.exports = {
     getMoment,
     getMomentTime,
-    getYesterday
+    getYesterday,
+    getCurrentTime
 }

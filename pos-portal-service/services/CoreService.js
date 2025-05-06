@@ -1,5 +1,6 @@
 const pool = require("../config/database/MySqlConnect")
 const { mappingResultData, mappingResultDataList } = require("../utils/ConvertThai")
+const { getCurrentTime } = require("../utils/MomentUtil")
 
 const { PrefixZeroFormat, Unicode2ASCII } = require("../utils/StringUtil")
 
@@ -148,13 +149,15 @@ const updateTableFile = async (tablefile) => {
   const TActive = tablefile.TActive || ""
   const TAutoClose = tablefile.TAutoClose || ""
 
+  const subTotalAmt = tablefile.SubTotal_Amt || 0
+
   // add vat info
   const Vat = tablefile.Vat
   const VatAmt = tablefile.VatAmt
 
   const sql = `UPDATE tablefile 
         SET Tcode='${Tcode}',SoneCode='${SoneCode}',MacNo='${MacNo}',Cashier='${Cashier}',
-            TCurTime=curtime(),TCustomer='${TCustomer}',TItem='${TItem}',TAmount='${TAmount}',
+            TCurTime='${getCurrentTime()}',TCustomer='${TCustomer}',TItem='${TItem}',TAmount='${TAmount}',
             TOnAct='${TOnAct}',
             Service='${Service}',
             ServiceAmt='${ServiceAmt}',
@@ -178,7 +181,7 @@ const updateTableFile = async (tablefile) => {
             CCUseCode='${CCUseCode}',
             TTableIsOn='${TTableIsOn}',
             TActive='${TActive}',TAutoClose='${TAutoClose}',
-            Vat='${Vat}',VatAmt='${VatAmt}' 
+            Vat='${Vat}',VatAmt='${VatAmt}',SubTotal_Amt='${subTotalAmt}' 
             WHERE Tcode='${Tcode}'`
 
   const results = await pool.query(sql)
@@ -424,19 +427,12 @@ const summaryBalance = async (tableNo, macno) => {
     netTotalAmount
   )
 
-  // compute discount ท้ายบิล
-  const { EmpDiscAmt, FastDiscAmt, TrainDiscAmt, MemDiscAmt, SubDiscAmt,
-    DiscBath, ProDiscAmt, SpaDiscAmt, CuponDiscAmt
-  } = tablefile
-  const discountAmount = EmpDiscAmt + FastDiscAmt + TrainDiscAmt + MemDiscAmt + SubDiscAmt + 
-  DiscBath + ProDiscAmt + SpaDiscAmt + CuponDiscAmt + responseData.totalItemDiscAmount
-  // end compute discount ท้ายบิล
-
   tablefile.MacNo = macno
   tablefile.Service = service
   tablefile.Vat = vat
   tablefile.TAmount = responseData.Food + responseData.Drink + responseData.Product
   tablefile.ServiceAmt = responseData.totalServiceAmount
+  tablefile.SubTotal_Amt = tablefile.TAmount + tablefile.ServiceAmt
   tablefile.ItemDiscAmt = responseData.totalItemDiscAmount
   tablefile.VatAmt = responseData.totalVatAmount
   tablefile.NetTotal = responseData.netTotalAmount
@@ -452,7 +448,8 @@ const summaryBalance = async (tableNo, macno) => {
   return {
     TItem: tablefile.TItem,
     TAmount: tablefile.TAmount,
-    DiscountAmount: discountAmount,
+    DiscountAmount: responseData.totalDiscountAmount,
+    SubTotal_Amt: tablefile.SubTotal_Amt,
     NetTotal: tablefile.NetTotal,
     ProductAndService: tablefile.TAmount + tablefile.ServiceAmt,
     Food: tablefile.Food,

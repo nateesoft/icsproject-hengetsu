@@ -2,8 +2,8 @@ const pool = require('../config/database/MySqlConnect');
 const { getMoment } = require('../utils/MomentUtil');
 const { mappingResultDataList } = require('../utils/ConvertThai');
 
-const getTempGiftList = async (macno) => {
-    const sql = `select * from tempgift where MacNo='${macno}'`;
+const getTempGiftList = async (tableNo) => {
+    const sql = `select * from tempgift where table_no='${tableNo}'`;
     const results = await pool.query(sql)
     return mappingResultDataList(results)
 }
@@ -23,13 +23,13 @@ const createListGiftFromTemp = async (giftTempList, B_Refno) => {
 const createTempGift = async (payload) => {
     const { MacNo='', giftbarcode='', gifttype='', giftprice='', 
         giftmodel='', giftlot='', giftexp='', giftcode='', 
-        giftno='', giftamt = 0 } = payload
+        giftno='', giftamt = 0, table_no } = payload
     const sql = `INSERT tempgift
         (MacNo, giftbarcode, gifttype, giftprice, giftmodel, giftlot, giftexp, giftcode, 
-        giftno, giftamt) 
+        giftno, giftamt, table_no) 
         VALUES('${MacNo}', '${giftbarcode}', '${gifttype}', '${giftprice}', 
         '${giftmodel}', '${giftlot}', '${giftexp}', '${giftcode}', 
-        '${giftno}', ${giftamt})`;
+        '${giftno}', ${giftamt}, '${table_no}')`;
     const results = await pool.query(sql)
     return results
 }
@@ -49,15 +49,15 @@ const createTGift = async (payload) => {
     return results
 }
 
-const deleteTempGiftAll = async (macno) => {
-    const sql = `delete from tempgift where MacNo='${macno}'`;
+const deleteTempGiftAll = async (macno, tableNo) => {
+    const sql = `delete from tempgift where MacNo='${macno}' and table_no='${tableNo}'`;
     const results = await pool.query(sql)
     return results
 }
 
-const deleteTempGiftByGiftNo = async (macno, giftNo) => {
+const deleteTempGiftByGiftNo = async (macno, giftNo, tableNo) => {
     const sql = `delete from tempgift 
-        where giftno='${giftNo}' and MacNo='${macno}'`;
+        where giftno='${giftNo}' and MacNo='${macno}' and table_no='${tableNo}'`;
     const results = await pool.query(sql)
     return results
 }

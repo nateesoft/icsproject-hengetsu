@@ -10,6 +10,7 @@ const { getMoment } = require('../utils/MomentUtil');
 const { printPaidInOutHtml } = require('./SyncPrinterService');
 const { getBranch } = require('./BranchService');
 const { Unicode2ASCII } = require('../utils/StringUtil');
+const { getCashierPrinterName } = require('./management/TerminalService');
 
 const PAID_IN_TYPE = "I"
 const PAID_OUT_TYPE = "O"
@@ -22,13 +23,15 @@ const createPaidIn = async ({ macno, cashier, paidinAmt }) => {
                 values ('${getMoment().format('YYYY-MM-DD')}', '${getMoment().format('HH:mm:ss')}', '${cashier}', '${macno}', '${PAID_IN_TYPE}', '${paidinAmt}', '0.00')`;
     const results = await pool.query(sql)
 
+    const printerInfo = await getCashierPrinterName(macno)
+
     // send to printer
     socket.emit(
         "printerMessage",
         JSON.stringify({
           id: 1,
           printerType: "receipt",
-          printerName: "cashier",
+          printerName: printerInfo.receipt_printer || 'cashier',
           message: await printPaidInOutHtml({
             branchName: `${branch.Code} - ${branch.Name}`,
             cashier, 
@@ -36,7 +39,8 @@ const createPaidIn = async ({ macno, cashier, paidinAmt }) => {
             typeDesc: "Cash In", 
             timeProcess: getMoment().format('DD/MM/YYYY HH:mm:ss'), 
             reason: "",
-            macno
+            macno,
+            printerInfo
           }),
           terminal: "",
           tableNo: "",
@@ -58,13 +62,15 @@ const createPaidOut = async ({ macno, cashier, paidoutAmt, reason }) => {
               values ('${getMoment().format('YYYY-MM-DD')}', '${getMoment().format('HH:mm:ss')}', '${cashier}', '${macno}', '${PAID_OUT_TYPE}', '0.00', '${paidoutAmt}', '${reasonConv}')`;
   const results = await pool.query(sql)
 
+  const printerInfo = await getCashierPrinterName(macno)
+
   // send to printer
   socket.emit(
       "printerMessage",
       JSON.stringify({
         id: 1,
         printerType: "receipt",
-        printerName: "cashier",
+        printerName: printerInfo.receipt_printer || 'cashier',
         message: await printPaidInOutHtml({
           branchName: `${branch.Code} - ${branch.Name}`,
           cashier, 
@@ -72,7 +78,8 @@ const createPaidOut = async ({ macno, cashier, paidoutAmt, reason }) => {
           typeDesc: "Cash Out", 
           timeProcess: getMoment().format('DD/MM/YYYY HH:mm:ss'), 
           reason,
-          macno
+          macno,
+          printerInfo
         }),
         terminal: "",
         tableNo: "",

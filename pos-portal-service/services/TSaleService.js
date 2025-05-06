@@ -1,6 +1,6 @@
 const pool = require('../config/database/MySqlConnect');
 const { mappingResultDataList } = require('../utils/ConvertThai');
-const { getMoment } = require('../utils/MomentUtil');
+const { getMoment, getCurrentTime } = require('../utils/MomentUtil');
 const { Unicode2ASCII } = require('../utils/StringUtil');
 const { listIngredeint, getPSetByPCode, getPCategoryByRLinkIndex } = require('./ProductService');
 const { ProcessStockOut } = require('./STCardService');
@@ -282,7 +282,7 @@ const processAllGroupSetReturn = async (R_Index, R_Table, R_Quan, Cashier, empCo
                 cashier='${Cashier}',
                 r_emp='${empCode}',
                 r_voiduser='${Cashier}',
-                r_voidtime=curtime(),
+                r_voidtime='${getCurrentTime()}',
                 r_discbath='0',
                 macno='${macno}',
                 r_kicprint='',

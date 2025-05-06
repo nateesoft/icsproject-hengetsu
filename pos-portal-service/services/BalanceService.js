@@ -4,7 +4,7 @@ const { PrefixZeroFormat, Unicode2ASCII } = require('../utils/StringUtil');
 const { getProductByPCode } = require('./ProductService');
 const { ProcessStockOut } = require('./STCardService');
 const { processAllPIngredent, processAllPSet, processAllPIngredentReturnStock, processAllPSetReturn, processAllGroupSetReturn } = require('./TSaleService');
-const { getMoment } = require('../utils/MomentUtil');
+const { getMoment, getCurrentTime } = require('../utils/MomentUtil');
 const { getBalanceByRIndex, getBalanceMaxIndex, summaryBalance } = require('./CoreService');
 const { mappingResultDataList } = require('../utils/ConvertThai');
 
@@ -51,7 +51,7 @@ const voidMenuBalance = async ({ R_Index, Cachier, empCode, voidMsg, macno }) =>
                 cashier='${Cachier}',
                 r_emp='${empCode}',
                 r_voiduser='${Cachier}',
-                r_voidtime=curtime(),
+                r_voidtime='${getCurrentTime()}',
                 r_discbath='0',
                 macno='${macno}',
                 r_kicprint='',

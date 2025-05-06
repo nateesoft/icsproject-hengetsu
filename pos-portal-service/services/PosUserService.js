@@ -1,7 +1,6 @@
 const pool = require('../config/database/MySqlConnect')
 const { decryptData } = require('../utils/StringUtil')
 const { mappingResultData } = require('../utils/ConvertThai')
-const { sendToDirectPrinter } = require('./PrinterService')
 
 const checkLogin = async (username, password, macno) => {
     const sql = `select * from posuser 
@@ -11,11 +10,6 @@ const checkLogin = async (username, password, macno) => {
         const sqlUpdate = `update posuser 
         set onact='Y', macno='${macno}' where username='${username}'`
         await pool.query(sqlUpdate)
-
-        sendToDirectPrinter({
-            "type": "login",
-            "message": "Print logged in."
-        })
 
         const newResult = mappingResultData(results)
         return {...newResult, Password: ""}
@@ -37,11 +31,6 @@ const getLoginAuthen = async (username, password) => {
 const processLogout = async (username) => {
     const sqlUpdate = `update posuser set onact='N' where username='${username}'`
     const result = await pool.query(sqlUpdate)
-
-    sendToDirectPrinter({
-        "type": "logout",
-        "message": "Print logged out."
-    })
 
     return result
 }

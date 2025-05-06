@@ -3,9 +3,9 @@ const router = express.Router();
 
 const { getTempGiftList, getTGiftList, createTempGift, createTGift, deleteTempGiftByGiftNo } = require('../../../services/TGiftService');
 
-router.get('/temp/:macno', (req, res) => {
-  const { macno } = req.params
-  getTempGiftList(macno)
+router.get('/temp/:tableNo', (req, res) => {
+  const { tableNo } = req.params
+  getTempGiftList(tableNo)
     .then(rows => {
       res.status(200).json({ status: 2000, data: rows })
     })
@@ -14,9 +14,9 @@ router.get('/temp/:macno', (req, res) => {
     })
 });
 
-router.post('/temp/:macno/delete', (req, res) => {
-  const { macno, giftno } = req.body
-  deleteTempGiftByGiftNo(macno, giftno)
+router.post('/temp/:tableNo/delete', (req, res) => {
+  const { macno, giftno, tableNo } = req.body
+  deleteTempGiftByGiftNo(macno, giftno, tableNo)
     .then(rows => {
       res.status(200).json({ status: 2000, data: rows })
     })

@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 
 const { TOPIC_NAME } = require('../../config/kafka/constants');
-const { printTest, printReceiptProcess } = require('../../services/PrinterService');
 const { getBillNoByRefno } = require('../../services/BillNoService');
 const { getPOSConfigSetup } = require('../../services/CoreService');
 const { getDataByMacno } = require('../../services/PosHwSetup');
@@ -14,7 +13,6 @@ module.exports = args => {
 
   router.post('/print-test', (req, res) => {
     const config = req.body
-    printTest(config)
     res.status(200).json({
       status: "Ok!",
       message: `Send data to print test`,
@@ -67,8 +65,6 @@ module.exports = args => {
     if (billData.B_MemCode) {
       memberInfo = await getDataByMemberCode(billData.B_MemCode)
     }
-
-    printReceiptProcess(config, billData, printType, posConfigSetup, poshwSetup, creditList, tSale, memberInfo)
 
     res.status(200).json({
       status: 2000,

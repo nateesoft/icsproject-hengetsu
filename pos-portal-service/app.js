@@ -69,6 +69,9 @@ const paidInOutRouter = require('./routes/pos_restaurant/padinout')
 // booking interation
 const bookingRouter = require('./routes/api_integration')
 
+// utility router
+const approveRouter = require('./routes/pos_restaurant/approveCode')
+
 const app = express()
 app.use(cors())
 app.use(compression())
@@ -138,6 +141,8 @@ app.use('/api/cupon', cupon);
 app.use('/api/giftvoucher', giftvoucher);
 app.use('/api/branch', branch);
 app.use('/api/paidinout', paidInOutRouter)
+
+app.use('/api/approve-code', approveRouter)
 
 // support load all table
 app.use('/api/inventory', invenotryDbRouter)

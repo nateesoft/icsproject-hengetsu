@@ -308,7 +308,7 @@ const printReceiptHtml = async ({ macno, billInfo, tSaleInfo, printerInfo }) => 
         <font face="${fontFamily}" size="4">Deposit</font>
       </td>
       <td align="right">
-        <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_Earnest)} -</font>
+        <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_Earnest)}-</font>
       </td>
     </tr>
     `
@@ -498,7 +498,7 @@ const printReceiptHtml = async ({ macno, billInfo, tSaleInfo, printerInfo }) => 
               <font face="${fontFamily}" size="4">Service Charge(${parseInt(billInfo.B_Service)}%):</font>
             </td>
             <td align="right">
-              <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_ServiceAmt)} +</font>
+              <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_ServiceAmt)}+</font>
             </td>
           </tr>
           <tr>
@@ -882,7 +882,7 @@ const printReviewReceiptHtml = async ({ macno, tableInfo, balanceInfo, printerIn
         <font face="${fontFamily}" size="4">Deposit</font>
       </td>
       <td align="right">
-        <font face="${fontFamily}" size="4">${formatNumber(tableInfo.DepositAmt)} -</font>
+        <font face="${fontFamily}" size="4">${formatNumber(tableInfo.DepositAmt)}-</font>
       </td>
     </tr>`
   }
@@ -975,7 +975,7 @@ const printReviewReceiptHtml = async ({ macno, tableInfo, balanceInfo, printerIn
             <font face="${fontFamily}" size="4">Service Charge(${parseInt(tableInfo.Service)}%):</font>
           </td>
           <td align="right">
-            <font face="${fontFamily}" size="4">${formatNumber(tableInfo.ServiceAmt)} +</font>
+            <font face="${fontFamily}" size="4">${formatNumber(tableInfo.ServiceAmt)}+</font>
           </td>
         </tr>
         <tr>
@@ -1098,7 +1098,7 @@ const printRefundBillHtml = async ({ macno, billInfo, tSaleInfo, printerInfo }) 
             <font face="${fontFamily}" size="4">Receipt No.: ${billInfo.B_Refno}</font>
           </td>
           <td align="right">
-            <font face="${fontFamily}" size="4">Table No: ${billInfo.B_Table} ... </font>
+            <font face="${fontFamily}" size="4">Table No: ${billInfo.B_Table}</font>
           </td>
         </tr>
         <tr>
@@ -1291,7 +1291,7 @@ const printRefundBillHtml = async ({ macno, billInfo, tSaleInfo, printerInfo }) 
         <font face="${fontFamily}" size="4">Deposit</font>
       </td>
       <td align="right">
-        <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_Earnest)} -</font>
+        <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_Earnest)}-</font>
       </td>
     </tr>`
   }
@@ -1480,7 +1480,7 @@ const printRefundBillHtml = async ({ macno, billInfo, tSaleInfo, printerInfo }) 
                 <font face="${fontFamily}" size="4">Service Charge(${parseInt(billInfo.B_Service)}%):</font>
             </td>
             <td align="right">
-                <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_ServiceAmt)} +</font>
+                <font face="${fontFamily}" size="4">${formatNumber(billInfo.B_ServiceAmt)}+</font>
             </td>
           </tr>
           <tr>

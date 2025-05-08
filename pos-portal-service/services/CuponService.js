@@ -117,11 +117,21 @@ const getTempCuponByTable = async (tableNo) => {
     return mappingResultDataList(results)
 }
 
+const getTempCuponInfo = async (tableNo) => {
+    const sql = `select c.*, t.CuQuan from cupon c 
+      inner join tempcupon t on c.CuCode=t.CuCode 
+      where R_Table='${tableNo}'`;
+    const results = await pool.query(sql)
+
+    return mappingResultDataList(results)
+}
+
 module.exports = {
   getDataCupon,
   saveDataCupon,
   summaryCuponDiscountAmount,
   addDataFromTemp,
   getCuponByRefno,
-  getTempCuponByTable
+  getTempCuponByTable,
+  getTempCuponInfo
 }

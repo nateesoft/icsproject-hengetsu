@@ -392,12 +392,12 @@ const updateBalanceDetail = async payload => {
         R_Service, R_Stock, R_Set, R_Vat, R_Type, R_Price, R_PrType, R_PrCode,
         R_DiscBath, R_PrCuType, R_PrCuQuan, R_PrCuAmt, R_Redule, R_Kic,
         R_KicPrint, R_Void, R_VoidUser, R_VoidTime, FieldName, R_PrCuCode, R_Serve, R_PrintOK, R_KicOK,
-        StkCode, PosStk, R_PrChkType, R_PrQuan, R_PrSubType, R_PrSubCode, R_PrSubQuan, R_PrSubDisc,
+        StkCode, PosStk, R_PrChkType, R_PrSubType, R_PrSubCode, R_PrSubQuan, R_PrSubDisc,
         R_PrSubBath, R_PrSubAmt, R_PrSubAdj, R_PrCuDisc, R_PrCuBath, R_PrCuAdj, R_Order,
         R_PItemNo, R_PKicQue, R_MemSum, R_PrVcType="", R_PrVcCode, R_PrVcAmt, R_PrVcAdj, R_VoidQuan,
         R_MoveFlag, R_MovePrint, R_Pause, R_SPIndex, R_LinkIndex, R_VoidPause, R_MoveItem, R_MoveFrom,
         R_MoveUser, VoidMsg, R_PrintItemBill, R_CountTime, SoneCode, R_Earn, R_EarnNo, TranType,
-        PDAPrintCheck, PDAEMP, R_empName, R_ServiceAmt, R_PEName, R_Indulgent, R_Quan, R_QuanCanDisc } = oldBalance
+        PDAPrintCheck, PDAEMP, R_empName, R_ServiceAmt, R_PEName, R_Indulgent, R_Quan } = oldBalance
 
     const R_Opt = mappingOpt(optList, specialText)
 
@@ -427,8 +427,8 @@ const updateBalanceDetail = async payload => {
     // for discount
     let RPrType = R_PrType || ''
     let newDiscountBaht = 0
-    let RQuanCanDisc = R_QuanCanDisc
-    let RPrQuan = R_PrQuan
+    let RQuanCanDisc = R_Quan
+    let RPrQuan = R_Quan
     if (R_Discount === 'Y') {
         if (discount.discountPercent > 0) {
             RPrDisc = discount.discountPercent
@@ -439,8 +439,8 @@ const updateBalanceDetail = async payload => {
 
         if(newDiscountBaht>0){
             RPrType = '-I'
-            RQuanCanDisc = RQuanCanDisc - R_Quan
-            RPrQuan = RPrQuan + R_Quan
+            RQuanCanDisc = 0
+            RPrQuan = R_Quan
         }else{
             RPrType = ''
         }

@@ -106,12 +106,16 @@ const printCopyBill = async (billNo, Cashier, macno, copy) => {
   const sql = `UPDATE billno 
     SET B_MacNo='${macno}',
     B_Cashier='${Cashier}',
-    B_BillCopy=B_BillCopy+${copy} WHERE B_Refno='${billNo}'`
+    B_BillCopy=B_BillCopy+${copy} WHERE B_Refno='${billNo}' and B_Void <> 'V'`
   await pool.query(sql)
 
   const billInfo = await getBillNoByRefno(billNo)
-  const tSaleInfo = await getAllTSaleByRefnoSummary(billNo)
 
+  if(billInfo.B_Void === 'V'){
+    return "Refund"
+  }
+
+  const tSaleInfo = await getAllTSaleByRefnoSummary(billNo)
   const printerInfo = await getCashierPrinterName(macno)
 
   // send to printer

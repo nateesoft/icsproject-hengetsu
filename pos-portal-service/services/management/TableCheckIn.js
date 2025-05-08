@@ -26,7 +26,7 @@ const getLastTableCheckIn = async (tableNo) => {
 }
 
 const updateTableCustomer = async (tableNo, customerCount) => {
-    const sql = `update tablefile  set TCustomer='${customerCount}' where TCode='${tableNo}'`;
+    const sql = `update tablefile set TCustomer='${customerCount}' where TCode='${tableNo}'`;
     const results = await mysqlPool.query(sql)
     return results
 }

@@ -327,7 +327,7 @@ const addNewBalance = async payload => {
     const R_PrCuDisc = 0;
     const R_PrCuBath = 0;
     const R_PrCuAdj = 0;
-    const R_QuanCanDisc = 1;
+    const R_QuanCanDisc = qty;
     const R_PrVcType = "";
     const R_PrVcCode = "";
     const R_VoidPause = "";

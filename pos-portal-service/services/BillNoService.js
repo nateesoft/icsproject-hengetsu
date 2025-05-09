@@ -712,7 +712,6 @@ const createNewBalanceFromTSale = async (tSale, tableNo) => {
   newBalance.R_Serve = ""
   newBalance.R_PrintOK = ""
   newBalance.R_KicOK = ""
-  newBalance.R_QuanCanDisc = 0
   newBalance.R_Order = ""
   newBalance.R_MemSum = ""
   newBalance.R_VoidQuan = 0

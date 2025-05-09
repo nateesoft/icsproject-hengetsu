@@ -186,13 +186,13 @@ const updateTableDiscount = async (payload) => {
   await pool.query(sqlClearDiscounTable)
 
   const sqlClearBalance = `UPDATE balance 
-    SET R_QuanCanDisc=R_QuanCanDisc+R_PrSubQuan+R_PrCuQuan+R_PrQuan,
+    SET R_QuanCanDisc=R_QuanCanDisc+R_PrSubQuan+R_PrCuQuan,
     R_PrDisc='0', R_PrBath='0', R_PrAmt='0',
     R_DiscBath='0', R_PrCuQuan='0', R_PrCuAmt='0',
     R_Redule='0', R_PrSubQuan='0',
     R_PrSubDisc='0', R_PrSubBath='0', R_PrSubAmt='0',
     R_PrSubAdj='0', R_PrCuDisc='0', R_PrCuBath='0',
-    R_PrCuAdj='0', R_PrSubType='', R_PrSubCode='',R_PrQuan='0' 
+    R_PrCuAdj='0', R_PrSubType='', R_PrSubCode='',R_PrCuType='' 
     WHERE R_Table='${tableFile.Tcode}' and R_LinkIndex = '' and R_Void != 'V'`
   await pool.query(sqlClearBalance)
 

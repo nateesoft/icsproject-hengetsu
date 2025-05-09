@@ -319,6 +319,7 @@ const computeBalanceSummary = (
         totalProductNoneVatAmount += productNonVat
         netTotalAmount += subTotalAmount
       } else if (balance.R_Service === "N" && balance.R_Vat === "N") { // ไม่คิดภาษี และ Service
+        totalDiscountAmount += sumDiscountAll
         totalServiceAmount += 0
         totalVatAmount += 0
         totalProductNoneVatAmount += RNetTotal

@@ -170,7 +170,7 @@ const printReceiptHtml = async ({ macno, billInfo, tSaleInfo, printerInfo }) => 
     tipsItem += `</div>`
 
   const subTotalItems = tSaleInfo.reduce((sum, item) => {
-    return (item.R_Void !== 'V') ? sum + item.R_Quan: sum
+    return (item.R_Void !== 'V' && item.R_PluCode !== 'TIPS') ? sum + item.R_Quan: sum
   }, 0)
 
   const totalDiscountAmount = billInfo.B_FastDiscAmt + billInfo.B_EmpDiscAmt + billInfo.B_MemDiscAmt + 
@@ -695,8 +695,10 @@ const printReviewReceiptHtml = async ({ macno, tableInfo, balanceInfo, printerIn
   billTable += `</table></div>`
 
   const subTotalItems = balanceInfo.reduce((sum, item) => {
-    return (item.R_Void !== 'V') ? sum + item.R_Quan: sum
+    return (item.R_Void !== 'V' && item.R_PluCode !== 'TIPS') ? sum + item.R_Quan: sum
   }, 0)
+
+  const grandTotalAmt = tableInfo.NetTotal-tableInfo.DepositAmt-tableInfo.GiftVoucher_Amt
 
   let totalDiscountAmount = tableInfo.FastDiscAmt + tableInfo.EmpDiscAmt + tableInfo.MemDiscAmt 
   + tableInfo.TrainDiscAmt + tableInfo.SubDiscAmt + tableInfo.DiscBath + tableInfo.CuponDiscAmt
@@ -1023,7 +1025,7 @@ const printReviewReceiptHtml = async ({ macno, tableInfo, balanceInfo, printerIn
             <font face="${fontFamily}" size="4">Grand Total:</font>
           </td>
           <td align="right">
-            <font face="${fontFamily}" size="4">${formatNumber(tableInfo.NetTotal-tableInfo.DepositAmt-tableInfo.GiftVoucher_Amt)}</font>
+            <font face="${fontFamily}" size="4">${formatNumber(Math.round(grandTotalAmt))}</font>
           </td>
         </tr>
       </table>
@@ -1134,26 +1136,26 @@ const printRefundBillHtml = async ({ macno, billInfo, tSaleInfo, printerInfo }) 
       for (const [index, tSale] of tSaleInfo.entries()) {
         if(tSale.R_PluCode=== 'TIPS') {
           tipsItem += `<font face="${fontFamily}" size="4">${truncateWord(tSale.R_PName)} ... ${formatNumber(tSale.R_Total)}</font>`
-          return
+        }else{
+          billTable += `
+          <tr>
+            <td style="max-width: 100px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">
+              <font face="${fontFamily}" size="4">${truncateWord(tSale.R_PName)}</font>
+            </td>
+            <td align="right">
+              <font face="${fontFamily}" size="4">${tSale.R_Quan}</font>
+            </td>
+            <td align="right">
+              <font face="${fontFamily}" size="4">${formatNumber(tSale.R_Total)}</font>
+            </td>
+          </tr>`
         }
-        billTable += `
-        <tr>
-          <td style="max-width: 100px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">
-            <font face="${fontFamily}" size="4">${truncateWord(tSale.R_PName)}</font>
-          </td>
-          <td align="right">
-            <font face="${fontFamily}" size="4">${tSale.R_Quan}</font>
-          </td>
-          <td align="right">
-            <font face="${fontFamily}" size="4">${formatNumber(tSale.R_Total)}</font>
-          </td>
-        </tr>`
       }
       billTable += `</table></div>`
       tipsItem += `</div>`
 
   const subTotalItems = tSaleInfo.reduce((sum, item) => {
-    return (item.R_Void !== 'V') ? sum + item.R_Quan: sum
+    return (item.R_Void !== 'V' && item.R_PluCode !== 'TIPS') ? sum + item.R_Quan: sum
   }, 0)
 
   const totalDiscountAmount = billInfo.B_FastDiscAmt + billInfo.B_EmpDiscAmt + billInfo.B_MemDiscAmt + 

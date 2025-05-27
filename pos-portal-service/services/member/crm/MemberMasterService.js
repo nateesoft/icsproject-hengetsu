@@ -6,7 +6,9 @@ const { getDataBranchPoint } = require('./PointTypeService');
 const { getMoment, getYesterday } = require('../../../utils/MomentUtil')
 
 const getData = async () => {
-    const sql = `select * from memmaster order by Member_Code limit 0, 50`;
+    const sql = `select * from memmaster 
+    where Member_Active='Y' 
+    order by Member_Code limit 0, 50`;
     const results = await pool.query(sql)
     const mappingResult = results.map((item, index) => {
         return { ...item, Member_NameThai: ASCII2Unicode(item.Member_NameThai) }
@@ -18,6 +20,43 @@ const getData = async () => {
 const getMemberByCode = async (memberCode) => {
     const sql = `select * from memmaster 
     where Member_Code='${memberCode}' order by Member_Code limit 0, 50`;
+    const results = await pool.query(sql)
+    return results
+}
+
+const getReportAll = async (branchCode1, branchCode2) => {
+    const sql = `SELECT Member_Code, Member_NameThai, Member_ExpiredDate, 
+    Member_PointExpiredDate, Member_TotalPurchase , Member_TotalScore 
+    FROM memmaster 
+    WHERE member_branchcode between '${branchCode1}' and '${branchCode2}' 
+    ORDER BY Member_Code`;
+    const results = await pool.query(sql)
+    return results
+}
+const getReportNewRegister = async (branchCode1, branchCode2, date1, date2) => {
+    const sql = `SELECT Member_Code, Member_NameThai, Member_ExpiredDate, 
+    Member_PointExpiredDate, Member_TotalPurchase , Member_TotalScore 
+    FROM memmaster 
+    WHERE member_branchcode between '${branchCode1}' and '${branchCode2}' 
+    ORDER BY Member_Code`;
+    const results = await pool.query(sql)
+    return results
+}
+const getReportNotCome = async (branchCode1, branchCode2, date1, date2) => {
+    const sql = `SELECT Member_Code, Member_NameThai, Member_ExpiredDate, 
+    Member_PointExpiredDate, Member_TotalPurchase , Member_TotalScore 
+    FROM memmaster 
+    WHERE member_branchcode between '${branchCode1}' and '${branchCode2}' 
+    ORDER BY Member_Code`;
+    const results = await pool.query(sql)
+    return results
+}
+const getReportFirstCheckIn = async (branchCode1, branchCode2, date1, date2) => {
+    const sql = `SELECT Member_Code, Member_NameThai, Member_ExpiredDate, 
+    Member_PointExpiredDate, Member_TotalPurchase , Member_TotalScore 
+    FROM memmaster 
+    WHERE member_branchcode between '${branchCode1}' and '${branchCode2}' 
+    ORDER BY Member_Code`;
     const results = await pool.query(sql)
     return results
 }
@@ -199,5 +238,10 @@ module.exports = {
     getDataByMemberCode,
     searchData,
     updateRefundMember,
-    updateMemberData
+    updateMemberData,
+    getReportAll,
+    getReportNewRegister,
+    getReportNotCome,
+    getReportFirstCheckIn,
+    getMemberByCode
 }

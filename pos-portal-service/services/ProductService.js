@@ -25,7 +25,7 @@ const getProductActiveByPCode = async pcode => {
 const listIngredeint = async (pluCode) => {
     const sql = `select i.*,pdesc,PBPack,pstock,pactive 
     from product p inner join pingredent i on p.pcode=i.pingcode 
-    where i.pcode='${pluCode}' and PFix='L' and PStock='Y'`;
+    where i.pcode='${pluCode}' and PFix in('L','S') and PStock='Y'`;
     const results = await pool.query(sql)
 
     return mappingResultDataList(results)

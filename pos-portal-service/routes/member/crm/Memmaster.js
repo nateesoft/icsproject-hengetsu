@@ -36,8 +36,8 @@ router.get('/:Member_Code', function (req, res) {
     })
 });
 
-router.get('/report/all-member', function (req, res) {
-  const { branch1, branch2 } = req.query
+router.post('/report/all-member', function (req, res) {
+  const { branch1, branch2 } = req.body
   MemberMasterService.getReportAll(branch1, branch2)
     .then(rows => {
       res.status(200).json({ status: 2000, data: rows })
@@ -47,8 +47,8 @@ router.get('/report/all-member', function (req, res) {
     })
 });
 
-router.get('/report/new-register', function (req, res) {
-  const { branch1, branch2, date1, date2 } = req.params
+router.post('/report/new-register', function (req, res) {
+  const { branch1, branch2, date1, date2 } = req.body
   MemberMasterService.getReportNewRegister(branch1, branch2, date1, date2)
     .then(rows => {
       res.status(200).json({ status: 2000, data: rows })
@@ -58,9 +58,9 @@ router.get('/report/new-register', function (req, res) {
     })
 });
 
-router.get('/report/not-come', function (req, res) {
-  const { branch1, branch2, date1, date2 } = req.params
-  MemberMasterService.getReportNotCome(branch1, branch2, date1, date2)
+router.post('/report/first-check-in', function (req, res) {
+  const { branch1, branch2, date1, date2 } = req.body
+  MemberMasterService.getReportFirstCheckIn(branch1, branch2, date1, date2)
     .then(rows => {
       res.status(200).json({ status: 2000, data: rows })
     })
@@ -69,9 +69,9 @@ router.get('/report/not-come', function (req, res) {
     })
 });
 
-router.get('/report/first-check-in', function (req, res) {
-  const { branch1, branch2, date1, date2 } = req.params
-  MemberMasterService.getReportFirstCheckIn(branch1, branch2, date1, date2)
+router.post('/report/not-come', function (req, res) {
+  const { branch1, branch2 } = req.body
+  MemberMasterService.getReportNotCome(branch1, branch2)
     .then(rows => {
       res.status(200).json({ status: 2000, data: rows })
     })

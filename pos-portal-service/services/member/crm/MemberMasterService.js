@@ -33,29 +33,35 @@ const getReportAll = async (branchCode1, branchCode2) => {
     const results = await pool.query(sql)
     return results
 }
+
 const getReportNewRegister = async (branchCode1, branchCode2, date1, date2) => {
     const sql = `SELECT Member_Code, Member_NameThai, Member_ExpiredDate, 
     Member_PointExpiredDate, Member_TotalPurchase , Member_TotalScore 
     FROM memmaster 
-    WHERE member_branchcode between '${branchCode1}' and '${branchCode2}' 
+    WHERE member_branchcode BETWEEN '${branchCode1}' AND '${branchCode2}' 
+    AND Member_AppliedDate BETWEEN '${date1}' AND '${date2}' 
     ORDER BY Member_Code`;
     const results = await pool.query(sql)
     return results
 }
-const getReportNotCome = async (branchCode1, branchCode2, date1, date2) => {
-    const sql = `SELECT Member_Code, Member_NameThai, Member_ExpiredDate, 
-    Member_PointExpiredDate, Member_TotalPurchase , Member_TotalScore 
-    FROM memmaster 
-    WHERE member_branchcode between '${branchCode1}' and '${branchCode2}' 
-    ORDER BY Member_Code`;
-    const results = await pool.query(sql)
-    return results
-}
+
 const getReportFirstCheckIn = async (branchCode1, branchCode2, date1, date2) => {
     const sql = `SELECT Member_Code, Member_NameThai, Member_ExpiredDate, 
     Member_PointExpiredDate, Member_TotalPurchase , Member_TotalScore 
     FROM memmaster 
     WHERE member_branchcode between '${branchCode1}' and '${branchCode2}' 
+    AND Member_LastDateService BETWEEN '${date1}' AND '${date2}' 
+    ORDER BY Member_Code`;
+    const results = await pool.query(sql)
+    return results
+}
+
+const getReportNotCome = async (branchCode1, branchCode2) => {
+    const sql = `SELECT Member_Code, Member_NameThai, Member_ExpiredDate, 
+    Member_PointExpiredDate, Member_TotalPurchase , Member_TotalScore 
+    FROM memmaster 
+    WHERE member_branchcode between '${branchCode1}' and '${branchCode2}' 
+    and Member_LastDateService is null 
     ORDER BY Member_Code`;
     const results = await pool.query(sql)
     return results
@@ -126,6 +132,7 @@ const checkDateExpired = (startDateStr, endDateStr) => {
 
     return currentDate.isBetween(startDate, endDate);
 }
+
 const checkTimeExpired = (startDateTimeStr, endDateTimeStr) => {
     const currentDateTime = getMoment().format('YYYY-MM-DD HH:mm:ss')
 
